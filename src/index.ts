@@ -13,6 +13,9 @@ type Rollouts = {
   }
 }
 
+/**
+ * @public
+ */
 export async function checkRollouts(domain: string): Promise<Rollouts> {
   const url = `https://${domain}`
   const res = await fetch(url, { headers: { "x-debug-rollouts": "true" } })
