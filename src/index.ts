@@ -4,12 +4,13 @@ type Rollout = {
   percentage: number
   prefix: string
   version: string
+  each1000sessions: number
 }
 
 type Rollouts = {
   map: Record<string, Rollout>
   rollout: {
-    records: Record<string, Rollout>
+    records: Record<string, [Rollout]>
   }
 }
 
