@@ -30,7 +30,17 @@ const commands = {
 
     if (rolloutName) {
       console.group(`Raw data for rollout "${rolloutName}" for domain "${domain}"`)
-      console.table(rollouts.rollout.records[rolloutName], ["percentage", "version"])
+
+      const rollout = rollouts.rollout.records[rolloutName]
+
+      // Simulate the distribution for 1000 sessions
+      let totalSessions = 1000.0
+      for (let i = 0; i < rollout.length; ++i) {
+        rollout[i].each1000sessions = Math.round(totalSessions * rollout[i].percentage / 100.0)
+        totalSessions -= rollout[i].each1000sessions
+      }
+
+      console.table(rollout, ["percentage", "version", "each1000sessions"])
       console.groupEnd()
     }
   },
