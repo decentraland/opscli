@@ -1,49 +1,10 @@
 #!/usr/bin/env node
 
-import { checkRollouts } from "."
-import arg from "arg"
-
-function assert(cond: any, message: string) {
-  if (!cond) throw new Error(message)
-}
-
 export class CliError extends Error {}
 
 const commands = {
-  async ["query-rollout"]() {
-    const args = arg({
-      "--domain": String,
-      "--rolloutName": String,
-    })
-
-    const domain = args["--domain"]!
-
-    assert(domain, "--domain is missing")
-
-    const rollouts = await checkRollouts(domain)
-
-    console.group(`Current rollouts for domain "${domain}" for this request`)
-    console.table(rollouts.map)
-    console.groupEnd()
-
-    const rolloutName = args["--rolloutName"]
-
-    if (rolloutName) {
-      console.group(`Raw data for rollout "${rolloutName}" for domain "${domain}"`)
-
-      const rollout = rollouts.rollout.records[rolloutName]
-
-      // Simulate the distribution for 1000 sessions
-      let totalSessions = 1000.0
-      for (let i = 0; i < rollout.length; ++i) {
-        rollout[i].each1000sessions = Math.round(totalSessions * rollout[i].percentage / 100.0)
-        totalSessions -= rollout[i].each1000sessions
-      }
-
-      console.table(rollout, ["percentage", "version", "each1000sessions"])
-      console.groupEnd()
-    }
-  },
+  "query-rollout": "./commands/query-rollout",
+  "wearables-consistency": "./commands/wearables-consistency",
 }
 
 async function main() {
@@ -58,7 +19,9 @@ async function main() {
     )
   }
 
-  await commands[commandName]()
+  const fn = require(commands[commandName]).default
+
+  await fn()
 }
 
 main().catch((err) => {

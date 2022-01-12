@@ -9,12 +9,8 @@ test:
 test-watch:
 	node_modules/.bin/jest --detectOpenHandles --colors --runInBand --watch $(TESTARGS)
 
-build-ts:
-	./node_modules/.bin/tsc -p tsconfig.json
-	chmod +x dist/bin.js
-
-build: build-ts
-	rm -rf node_modules/@microsoft/api-extractor/node_modules/typescript || true
-	./node_modules/.bin/api-extractor run $(LOCAL_ARG) --typescript-compiler-folder ./node_modules/typescript
+build:
+	@./node_modules/.bin/tsc -p tsconfig.json
+	@chmod +x dist/bin.js
 
 .PHONY: build test
