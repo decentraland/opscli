@@ -5,6 +5,7 @@ export class CliError extends Error {}
 const commands = {
   "query-rollout": "./commands/query-rollout",
   "wearables-consistency": "./commands/wearables-consistency",
+  "pointer-consistency": "./commands/pointer-consistency",
 }
 
 async function main() {

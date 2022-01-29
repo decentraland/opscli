@@ -19,3 +19,20 @@ export async function fetchWearablesByAddress(baseUrl: string, address: string) 
     )) as Array<{ urn: string; amount: number }>,
   }
 }
+
+export async function fetchEntityByPointer(baseUrl: string, pointer: string) {
+  return {
+    baseUrl,
+    deployments: (await fetch(`${baseUrl}/content/deployments?pointer=${encodeURIComponent(pointer)}&onlyCurrentlyPointed=true`).then(($) =>
+      $.json()
+    ).then($ => $.deployments)) as Array<{ 
+      entityId: string
+      entityVersion: string
+      entityType: string
+      entityTimestamp: number
+      metadata: unknown
+      pointers: string[]
+      content: {key: string, hash: string}[]
+     }>,
+  }
+}
