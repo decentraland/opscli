@@ -8,7 +8,7 @@ export type DAOCatalyst = {
 
 export async function daoCatalysts(): Promise<Array<DAOCatalyst>> {
   console.log("> Fetching DAO catalysts")
-  return await fetch("https://peer-lb.decentraland.org/lambdas/contracts/servers").then(($) => $.json())
+  return await fetch("https://peer.decentraland.org/lambdas/contracts/servers").then(($) => $.json())
 }
 
 export async function fetchWearablesByAddress(baseUrl: string, address: string) {
