@@ -1,6 +1,6 @@
 # @dcl/opscli
 
-Operations command line tool. You must login with NPM and your github user to use this command line.
+Operations command line tool.
 
 ## Commands
 
