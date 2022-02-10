@@ -17,6 +17,11 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14.x
+      - name: set package.json version
+        uses: menduz/oddish-action@master
+        with:
+          deterministic-snapshot: true
+          only-update-versions: true
       - name: install
         run:  npm install
       - name: build
@@ -26,8 +31,8 @@ jobs:
       - name: Publish
         uses: menduz/oddish-action@master
         with:
-          registry-url: "https://npm.pkg.github.com/"
-          scope: "@decentraland"
+          registry-url: 'https://registry.npmjs.org'
+          access: public
           deterministic-snapshot: true
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
