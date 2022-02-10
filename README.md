@@ -1,25 +1,15 @@
-# @decentraland/opscli
+# @dcl/opscli
 
 Operations command line tool. You must login with NPM and your github user to use this command line.
 
-## Login with Github to private NPM registry:
-
-```
-$ npm login --scope=@decentraland --registry=https://npm.pkg.github.com
-
-> Username: USERNAME
-> Password: TOKEN
-> Email: PUBLIC-EMAIL-ADDRESS
-```
-
-More info: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry
+## Commands
 
 ### `query-rollout`
 
 Usage:
 
 ```
-$ npx @decentraland/opscli@next query-rollout --domain play.decentraland.zone --rolloutName _site
+$ npx @dcl/opscli@next query-rollout --domain play.decentraland.zone --rolloutName _site
 
 Current rollouts for domain "play.decentraland.zone" for this request
   ┌─────────────────────┬────────────┬─────────────────────────┬───────────────────────────────────┐
