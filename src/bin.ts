@@ -6,6 +6,7 @@ const commands = {
   "query-rollout": "./commands/query-rollout",
   "wearables-consistency": "./commands/wearables-consistency",
   "pointer-consistency": "./commands/pointer-consistency",
+  "update-renderer-upm": "./commands/update-renderer-upm"
 }
 
 async function main() {
