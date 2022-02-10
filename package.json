@@ -1,5 +1,5 @@
 {
-  "name": "@decentraland/opscli",
+  "name": "@dcl/opscli",
   "version": "1.0.0",
   "description": "base component",
   "bin": "dist/bin.js",
