@@ -30,6 +30,7 @@ export async function fetchEntityByPointer(baseUrl: string, pointer: string) {
       entityVersion: string
       entityType: string
       entityTimestamp: number
+      localTimestamp: number
       metadata: unknown
       pointers: string[]
       content: {key: string, hash: string}[]

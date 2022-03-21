@@ -14,18 +14,29 @@ export default async function () {
   console.log(`  Got ${catalysts.length} catalysts`)
   console.log(`> Fetching wearables in every catalyst`)
 
+  const timestamps: Date[] = []
+  const entityIds = new Set<string>()
+
   for (let { baseUrl } of catalysts) {
     try {
       const result = await fetchEntityByPointer(baseUrl, pointer)
-      console.log(
-        "  " +
-          result.baseUrl.padEnd(45, ' ') +
-          new Date(result.deployments[0]?.entityTimestamp).toISOString() +
-          " " +
-          result.deployments[0]?.entityId
-      )
+      const date = new Date(result.deployments[0]?.localTimestamp)
+      console.log("  " + result.baseUrl.padEnd(45, " ") + date.toISOString() + " " + result.deployments[0]?.entityId)
+      timestamps.push(date)
+      entityIds.add(result.deployments[0]?.entityId)
     } catch (err: any) {
-      console.log("  " + baseUrl.padEnd(45, ' ') + err.message)
+      console.log("  " + baseUrl.padEnd(45, " ") + err.message)
     }
   }
+
+  timestamps.sort()
+
+  const minDate = timestamps[0]
+  const maxDate = timestamps[timestamps.length - 1]
+
+  console.log(
+    `> PropagationTime: ${Math.floor((maxDate.getTime() - minDate.getTime()) / 1000)} seconds  `.padEnd(47, " ") +
+      `${minDate.toISOString()} -> ${maxDate.toISOString()}`
+  )
+  console.log(`> Convergent: ${entityIds.size == 1 ? "✅" : "❌"}`)
 }
