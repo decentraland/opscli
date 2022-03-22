@@ -9,7 +9,7 @@ Operations command line tool.
 Usage:
 
 ```
-$ npx @dcl/opscli@next query-rollout --domain play.decentraland.zone --rolloutName _site
+$ npx @dcl/opscli query-rollout --domain play.decentraland.zone --rolloutName _site
 
 Current rollouts for domain "play.decentraland.zone" for this request
   ┌─────────────────────┬────────────┬─────────────────────────┬───────────────────────────────────┐
