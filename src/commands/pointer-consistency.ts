@@ -1,4 +1,5 @@
 import arg from "arg"
+import { ago } from "../helpers/ago"
 import { assert } from "../helpers/assert"
 import { daoCatalysts, fetchEntityByPointer, fetchWearablesByAddress } from "../helpers/catalysts"
 
@@ -21,7 +22,7 @@ export default async function () {
     try {
       const result = await fetchEntityByPointer(baseUrl, pointer)
       const date = new Date(result.deployments[0]?.localTimestamp)
-      console.log("  " + result.baseUrl.padEnd(45, " ") + date.toISOString() + " " + result.deployments[0]?.entityId)
+      console.log("  " + result.baseUrl.padEnd(45, " ") + date.toISOString() + ` (${ago(date)}) ` + result.deployments[0]?.entityId)
       timestamps.push(date)
       entityIds.add(result.deployments[0]?.entityId)
     } catch (err: any) {
