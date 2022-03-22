@@ -35,5 +35,6 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           access: public
           deterministic-snapshot: true
+          main-branch-latest-tag: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
