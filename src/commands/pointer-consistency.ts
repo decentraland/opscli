@@ -8,12 +8,16 @@ export default async function () {
     "--pointer": String,
   })
 
-  const pointer = assert(args["--pointer"], "--pointer is missing")
+  let pointer = assert(args["--pointer"], "--pointer is missing")
+
+  if (pointer.startsWith('\\')) {
+    pointer = pointer.substring(1)
+  }
 
   const catalysts = await daoCatalysts()
 
   console.log(`  Got ${catalysts.length} catalysts`)
-  console.log(`> Fetching wearables in every catalyst`)
+  console.log(`> Fetching pointer in every catalyst: ${JSON.stringify(pointer)}`)
 
   const timestamps: Date[] = []
   const entityIds = new Set<string>()
@@ -22,7 +26,13 @@ export default async function () {
     try {
       const result = await fetchEntityByPointer(baseUrl, pointer)
       const date = new Date(result.deployments[0]?.localTimestamp)
-      console.log("  " + result.baseUrl.padEnd(45, " ") + date.toISOString() + ` (${ago(date)}) ` + result.deployments[0]?.entityId)
+      console.log(
+        "  " +
+          result.baseUrl.padEnd(45, " ") +
+          date.toISOString() +
+          ` (${ago(date)}) ` +
+          result.deployments[0]?.entityId
+      )
       timestamps.push(date)
       entityIds.add(result.deployments[0]?.entityId)
     } catch (err: any) {
