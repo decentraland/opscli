@@ -4,6 +4,14 @@ Operations command line tool.
 
 ## Commands
 
+### Validate deployment consistency
+
+Check the active deployment by pointer on every catalyst, usage:
+
+```
+npx @dcl/opscli pointer-consistency --pointer "0,0"
+```
+
 ### `query-rollout`
 
 Usage:
