@@ -12,7 +12,6 @@ export default async function () {
 
   const catalysts = await daoCatalysts()
 
-  console.log(`  Got ${catalysts.length} catalysts`)
   console.log(`> Fetching wearables in every catalyst`)
 
   const results = await Promise.allSettled(catalysts.map(($) => fetchWearablesByAddress($.baseUrl, address)))
