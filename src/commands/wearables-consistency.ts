@@ -1,5 +1,4 @@
 import arg from "arg"
-import fetch from "node-fetch"
 import { assert } from "../helpers/assert"
 import { daoCatalysts, fetchWearablesByAddress } from "../helpers/catalysts"
 

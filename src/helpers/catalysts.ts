@@ -1,4 +1,4 @@
-import fetch from "node-fetch"
+import { fetch } from "undici"
 
 export type DAOCatalyst = {
   baseUrl: string
@@ -8,7 +8,7 @@ export type DAOCatalyst = {
 
 export async function daoCatalysts(): Promise<Array<DAOCatalyst>> {
   console.log("> Fetching DAO catalysts")
-  return await fetch("https://peer.decentraland.org/lambdas/contracts/servers").then(($) => $.json())
+  return (await fetch("https://peer.decentraland.org/lambdas/contracts/servers").then(($) => $.json())) as any
 }
 
 export async function fetchWearablesByAddress(baseUrl: string, address: string) {
@@ -23,9 +23,11 @@ export async function fetchWearablesByAddress(baseUrl: string, address: string) 
 export async function fetchEntityByPointer(baseUrl: string, pointer: string) {
   return {
     baseUrl,
-    deployments: (await fetch(`${baseUrl}/content/deployments?pointer=${encodeURIComponent(pointer)}&onlyCurrentlyPointed=true`).then(($) =>
-      $.json()
-    ).then($ => $.deployments)) as Array<{ 
+    deployments: (await fetch(
+      `${baseUrl}/content/deployments?pointer=${encodeURIComponent(pointer)}&onlyCurrentlyPointed=true`
+    )
+      .then(($) => $.json())
+      .then(($: any) => $.deployments)) as Array<{
       entityId: string
       entityVersion: string
       entityType: string
@@ -33,7 +35,7 @@ export async function fetchEntityByPointer(baseUrl: string, pointer: string) {
       localTimestamp: number
       metadata: unknown
       pointers: string[]
-      content: {key: string, hash: string}[]
-     }>,
+      content: { key: string; hash: string }[]
+    }>,
   }
 }

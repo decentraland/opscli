@@ -1,4 +1,4 @@
-import fetch from "node-fetch"
+import { fetch } from "undici"
 
 type Rollout = {
   percentage: number
@@ -21,5 +21,5 @@ export async function checkRollouts(domain: string): Promise<Rollouts> {
   const url = `https://${domain}`
   const res = await fetch(url, { headers: { "x-debug-rollouts": "true" } })
   if (!res.ok) throw new Error("Non-ok response from " + url)
-  return res.json()
+  return res.json() as any
 }
