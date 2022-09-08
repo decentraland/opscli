@@ -32,6 +32,9 @@ export default async function () {
   const response = await res.text()
 
   if (res.status != 200) {
+    if (response.includes("ParameterAlreadyExists")) {
+      throw new Error("That parameter already exists, please use '--update' if you want to update it")
+    }
     throw new Error(`An error has occured while uploading the secret: ${response}`)
   }
 

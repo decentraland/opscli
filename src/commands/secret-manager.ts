@@ -44,7 +44,7 @@ export default async function () {
 
   if (res.status != 200) {
     if (response.includes("ResourceExistsException")) {
-      throw new Error("That secret already exist, please use '--update' if you want to update it")
+      throw new Error("That secret already exists, please use '--update' if you want to update it")
     }
     throw new Error(`An error has occured while uploading the secret: ${response}`)
   }
