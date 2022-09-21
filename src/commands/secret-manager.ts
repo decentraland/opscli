@@ -1,10 +1,8 @@
 import arg from "arg"
 import fs from "fs/promises"
-import os from "os"
-import path from "path"
 import { fetch } from "undici"
-import { exec } from "child_process"
 import { assert } from "../helpers/assert"
+import { tldFromEnv } from "../helpers/env-domains"
 import { signGpgCleartext } from "../helpers/sign-gpg"
 
 export default async function () {
@@ -30,7 +28,7 @@ export default async function () {
 
   const fileContent = [env, name, secretContent].join("\n")
 
-  const envDomain = env == "prd" ? "org" : env == "stg" ? "today" : "zone"
+  const envDomain = tldFromEnv(env)
 
   const signed = await signGpgCleartext(fileContent)
 
