@@ -12,17 +12,20 @@ export default async function () {
     "--secretFile": String,
     "--secret": String,
     "--update": Boolean,
+    "--delete": Boolean,
   })
 
   let env = assert(args["--env"], "--env is missing")
   let name = assert(args["--name"], "--name is missing")
+  const deleteArgs = !!args["--delete"]
   const hasSecretValue = !!args["--secret"]
   const hasSecretFile = !!args["--secretFile"]
 
   if (hasSecretValue && hasSecretFile) throw new Error("--secretFile and --secret cannot be used at the same time")
-  if (!hasSecretValue && !hasSecretFile) throw new Error("You must provide either --secretFile or --secret")
+  if (!deleteArgs && !hasSecretValue && !hasSecretFile)
+    throw new Error("You must provide either --secretFile or --secret")
 
-  const secretContent = hasSecretValue || (await fs.readFile(args["--secretFile"]!)).toString()
+  const secretContent = (deleteArgs && "") || hasSecretValue || (await fs.readFile(args["--secretFile"]!)).toString()
 
   const update = !!args["--update"]
 
@@ -32,9 +35,10 @@ export default async function () {
 
   const signed = await signGpgCleartext(fileContent)
 
-  console.log("> Uploading the secrets...")
+  if (deleteArgs) console.log("> Deleting the secrets...")
+  else console.log("> Uploading the secrets...")
   const res = await fetch(`https://ops-lambdas.decentraland.${envDomain}/secrets-manager`, {
-    method: update ? "PUT" : "POST",
+    method: deleteArgs ? "DELETE" : update ? "PUT" : "POST",
     body: signed.toString(),
   })
 
