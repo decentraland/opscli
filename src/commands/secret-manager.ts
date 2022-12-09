@@ -17,18 +17,37 @@ export default async function () {
 
   let env = assert(args["--env"], "--env is missing")
   let name = assert(args["--name"], "--name is missing")
+
   const hasSecretValue = !!args["--secret"]
   const hasSecretFile = !!args["--secretFile"]
+  const hasUpdate = !!args["--update"]
+  const hasDelete = !!args["--delete"]
 
-  const deleteArgs = !!args["--delete"]
+  if (hasSecretValue && hasSecretFile) {
+    throw new Error("Cannot use both --secretFile and --secret")
+  }
 
-  if (hasSecretValue && hasSecretFile) throw new Error("--secretFile and --secret cannot be used at the same time")
-  if (!deleteArgs && !hasSecretValue && !hasSecretFile)
-    throw new Error("You must provide either --secretFile or --secret")
+  if (hasDelete && (hasSecretFile || hasSecretValue)) {
+    throw new Error("Cannot use --delete with --secretFile or --secret")
+  }
 
-  const secretContent = deleteArgs ? "" : (hasSecretValue || (await fs.readFile(args["--secretFile"]!)).toString())
+  if (hasDelete && hasUpdate) {
+    throw new Error("Cannot use --delete with --update")
+  }
 
-  const update = !!args["--update"]
+  if (!hasDelete && !hasSecretValue && !hasSecretFile) {
+    throw new Error("You must provide either --secretFile, --secret or --delete")
+  }
+
+  let secretContent = ""
+
+  if (hasDelete) {
+    secretContent = ""
+  } else if (hasSecretValue) {
+    secretContent = args["--secret"]!
+  } else if (hasSecretFile) {
+    secretContent = (await fs.readFile(args["--secretFile"]!)).toString()
+  }
 
   const fileContent = [env, name, secretContent].join("\n")
 
@@ -36,10 +55,14 @@ export default async function () {
 
   const signed = await signGpgCleartext(fileContent)
 
-  if (deleteArgs) console.log("> Deleting the secrets...")
-  else console.log("> Uploading the secrets...")
+  if (hasDelete) {
+    console.log("> Deleting the secrets...")
+  } else {
+    console.log("> Uploading the secrets...")
+  }
+  
   const res = await fetch(`https://ops-lambdas.decentraland.${envDomain}/secrets-manager`, {
-    method: deleteArgs ? "DELETE" : update ? "PUT" : "POST",
+    method: hasDelete ? "DELETE" : hasUpdate ? "PUT" : "POST",
     body: signed.toString(),
   })
 
