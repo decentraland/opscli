@@ -17,15 +17,16 @@ export default async function () {
 
   let env = assert(args["--env"], "--env is missing")
   let name = assert(args["--name"], "--name is missing")
-  const deleteArgs = !!args["--delete"]
   const hasSecretValue = !!args["--secret"]
   const hasSecretFile = !!args["--secretFile"]
+
+  const deleteArgs = !!args["--delete"]
 
   if (hasSecretValue && hasSecretFile) throw new Error("--secretFile and --secret cannot be used at the same time")
   if (!deleteArgs && !hasSecretValue && !hasSecretFile)
     throw new Error("You must provide either --secretFile or --secret")
 
-  const secretContent = (deleteArgs && "") || hasSecretValue || (await fs.readFile(args["--secretFile"]!)).toString()
+  const secretContent = deleteArgs ? "" : (hasSecretValue || (await fs.readFile(args["--secretFile"]!)).toString())
 
   const update = !!args["--update"]
 
