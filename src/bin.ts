@@ -8,7 +8,8 @@ const commands = {
   "pointer-consistency": "./commands/pointer-consistency",
   "update-renderer-upm": "./commands/update-renderer-upm",
   "secret-manager": "./commands/secret-manager",
-  "parameters-manager": "./commands/parameters-manager"
+  "parameters-manager": "./commands/parameters-manager",
+  "circleci": "./commands/circleci"
 }
 
 async function main() {
