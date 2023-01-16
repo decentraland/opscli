@@ -9,6 +9,7 @@ const commands = {
   "update-renderer-upm": "./commands/update-renderer-upm",
   "secret-manager": "./commands/secret-manager",
   "parameters-manager": "./commands/parameters-manager",
+  "download-entity": "./commands/download-entity",
   "circleci": "./commands/circleci"
 }
 
