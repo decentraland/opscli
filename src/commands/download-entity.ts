@@ -1,4 +1,5 @@
 import arg from "arg"
+import path, { resolve } from "path"
 import { assert } from "../helpers/assert"
 import { downloadEntityAndMetadata, getEntities } from "../helpers/downloads"
 
@@ -18,7 +19,8 @@ export default async () => {
 
   const entities = await getEntities(pointers, server)
   for (const entity of entities) {
-    console.log(`Downloading entity ${entity.pointers[0]}`)
+    const destFolder = resolve(out, entity.pointers[0]) + path.sep
+    console.log(`\nDownloading entity with pointers ${entity.pointers.join(',')} into ${destFolder}`)
     await downloadEntityAndMetadata(entity, server, out)
   }
 }

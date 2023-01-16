@@ -57,7 +57,9 @@ Raw data for rollout "_site" for domain "play.decentraland.zone"
 
 Downloads a specific entity from a content server, as specified in https://adr.decentraland.org/adr/ADR-79
 
-It creates an extra file named `.metadata` including the deployment metadata. Which in some cases (wearables) is not present in the shape of a file.
+It creates an extra file named `.metadata` including the deployment metadata. Which in some cases (wearables) is not present as a file in the deployed entity.
+
+In the specified folder, it will create one
 
 ```
 $ npx @dcl/opscli download-entity \
