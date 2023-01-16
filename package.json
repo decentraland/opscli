@@ -33,9 +33,10 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
+    "@dcl/schemas": "^6.4.2",
     "arg": "^5.0.2",
     "simple-git": "^3.14.0",
-    "undici": "^5.10.0"
+    "undici": "^5.15.0"
   },
   "files": [
     "dist"

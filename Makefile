@@ -5,6 +5,10 @@ endif
 
 test:
 	node_modules/.bin/jest --detectOpenHandles --colors --runInBand $(TESTARGS)
+	./dist/bin.js download-entity \
+	  --content-server https://peer.decentraland.org/content \
+	  --pointer=13,-137 \
+	  --pointer=urn:decentraland:off-chain:base-avatars:brown_pants
 
 test-watch:
 	node_modules/.bin/jest --detectOpenHandles --colors --runInBand --watch $(TESTARGS)
