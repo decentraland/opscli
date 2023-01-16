@@ -69,6 +69,26 @@ $ npx @dcl/opscli download-entity \
   --out ~/Downloads
 ```
 
+### `deploy-entity`
+
+Deploys an entity to a content server
+
+- `--pointer` Pointers of the entities, can be used many times, e.g. `--pointer=0,0 --pointer=0,1`
+- `--entity-type` Entity type
+- `--private-key` or `PRIVATE_KEY` env var
+- `--dry` do everything except publishing the entity
+- `--folder` to deploy, root level paths starting with `.` will be ignored, i.e. for .git folder. the `.metadata` file is required to create the entity
+
+```
+$ npx @dcl/opscli deploy-entity \
+  --dry \
+  --content-server https://peer.decentraland.org/content \
+  --entity-type wearable \
+  --folder=urn:decentraland:off-chain:base-avatars:brown_pants \
+  --pointer=urn:decentraland:off-chain:base-avatars:brown_pants \
+  --private-key=bde921a4a4abc644cced18f632aed0b3d34b1b36bc16fd97721ade1b7178cfff
+```
+
 ### `query-rollout`
 
 Usage:
