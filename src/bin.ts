@@ -10,6 +10,7 @@ const commands = {
   "secret-manager": "./commands/secret-manager",
   "parameters-manager": "./commands/parameters-manager",
   "download-entity": "./commands/download-entity",
+  "deploy-entity": "./commands/deploy-entity",
   "circleci": "./commands/circleci"
 }
 
