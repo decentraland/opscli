@@ -24,6 +24,15 @@ npx @dcl/opscli queue-ab-conversion \
   [--content-server https://peer.decentraland.org/content]
 ```
 
+### Check status of conversion
+
+```
+npx @dcl/opscli check-ab-conversion \
+  --pointer "0,0" \
+  --pointer "110,10" \
+  [--cid "bafy....."]
+```
+
 ### `query-rollout`
 
 Usage:
