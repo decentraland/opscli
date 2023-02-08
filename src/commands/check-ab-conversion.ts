@@ -39,10 +39,16 @@ export default async () => {
   for (const { entityId, pointers } of entityIdsToConvert) {
     const result = await fetch(`${abServer}/manifest/${entityId}.json`)
     if (!result.ok) {
-      console.log(`🔴 ${entityId} (${pointers[0]}): Not converted!`)
+      const failManifest = await fetch(`${abServer}/manifest/${entityId}_failed.json`)
+      if (failManifest.ok) {
+        const manifest = await failManifest.json() as any
+        console.log(`🟠 ${entityId} (${pointers[0]}): Failed. Version=${manifest.version} ExitCode=${manifest.exitCode} Date=${manifest.date} Log=${manifest.log}`)
+      } else {
+        console.log(`🔴 ${entityId} (${pointers[0]}): Not converted!`)
+      }
     } else {
       const manifest = await result.json() as any
-      console.log(`🟢 ${entityId} (${pointers[0]}): Version=${manifest.version} ExitCode=${manifest.exitCode}`)
+      console.log(`🟢 ${entityId} (${pointers[0]}): Version=${manifest.version} ExitCode=${manifest.exitCode} Date=${manifest.date}`)
     }
   }
 
