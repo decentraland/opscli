@@ -26,7 +26,7 @@ export const downloadFile = async function (server: string, cid: string, filepat
   await writeFile(filepath, Buffer.from(data))
 }
 
-export async function getEntities(pointers: string[], sourceServer: string): Promise<Entity[]> {
+export async function getActiveEntities(pointers: string[], sourceServer: string): Promise<Entity[]> {
   const url = `${sourceServer}/entities/active`
   const res = await fetch(url, {
     method: "post",

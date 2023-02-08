@@ -11,6 +11,7 @@ const commands = {
   "parameters-manager": "./commands/parameters-manager",
   "download-entity": "./commands/download-entity",
   "deploy-entity": "./commands/deploy-entity",
+  "queue-ab-conversion": "./commands/queue-ab-conversion",
   "circleci": "./commands/circleci"
 }
 

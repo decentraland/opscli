@@ -12,6 +12,18 @@ Check the active deployment by pointer on every catalyst, usage:
 npx @dcl/opscli pointer-consistency --pointer "0,0"
 ```
 
+### Schedule asset bundle conversion
+
+```
+npx @dcl/opscli queue-ab-conversion \
+  --pointer "0,0" \
+  --pointer "110,10" \
+  --cid "110,10" \
+  --token <ACCESS_TOKEN> \
+  [--ab-server https://asset-bundle-converter.decentraland.org] \
+  [--content-server https://peer.decentraland.org/content]
+```
+
 ### `query-rollout`
 
 Usage:

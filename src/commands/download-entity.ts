@@ -1,7 +1,7 @@
 import arg from "arg"
 import path, { join, resolve } from "path"
 import { assert } from "../helpers/assert"
-import { downloadEntityAndMetadata, getEntities } from "../helpers/downloads"
+import { downloadEntityAndMetadata, getActiveEntities } from "../helpers/downloads"
 
 export default async () => {
   const args = arg({
@@ -17,7 +17,7 @@ export default async () => {
   const server = (args["--content-server"] || "https://peer.decentraland.org/content").replace(/\/$/, "")
   const out = args["--out"] || process.cwd()
 
-  const entities = await getEntities(pointers, server)
+  const entities = await getActiveEntities(pointers, server)
 
   for (const entity of entities) {
     const destFolder = join(resolve(out), entity.pointers[0]) + path.sep
