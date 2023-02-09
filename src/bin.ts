@@ -13,6 +13,7 @@ const commands = {
   "deploy-entity": "./commands/deploy-entity",
   "queue-ab-conversion": "./commands/queue-ab-conversion",
   "check-ab-conversion": "./commands/check-ab-conversion",
+  "queue-ab-conversion-snapshot": "./commands/queue-ab-conversion-snapshot",
   "circleci": "./commands/circleci"
 }
 
