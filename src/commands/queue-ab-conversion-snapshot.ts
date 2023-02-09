@@ -11,7 +11,8 @@ export default async () => {
   const args = arg({
     "--snapshot": String,
     "--content-server": String,
-    "--start-position": Number,
+    "--start-position": String,
+    "--grep": String,
     "--ab-server": String,
     "--token": String
   })
@@ -47,14 +48,23 @@ export default async () => {
   const len = jsonNd.length
   console.log(`  File length ${(len / 1024 / 1024).toFixed(1)}MB`)
 
-  let currentCursor = args['--start-position'] || -1
+  let currentCursor = (args['--start-position'] ? jsonNd.indexOf(args['--start-position']) : 0) || -1
   let nextCursor = 0
   while ((nextCursor = jsonNd.indexOf('\n', currentCursor + 1)) != -1) {
     const line = jsonNd.substring(currentCursor, nextCursor)
     currentCursor = nextCursor
     if (line.trim().startsWith('{')) {
       const percent = (100 * (nextCursor / len)).toFixed(2)
+
+      if (args['--grep']) {
+        if (!line.match(args['--grep'])) {
+          continue
+        }
+      }
+
       const entity = JSON.parse(line)
+
+
       await queueConversion(abServer, {
         entity: {
           entityId: entity.entityId, authChain: [
