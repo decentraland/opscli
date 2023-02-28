@@ -9,13 +9,28 @@ export default async function () {
     "--env": String,
     "--name": String,
     "--value": String,
-    "--update": Boolean
+    "--update": Boolean,
+    "--delete": Boolean,
   })
 
   const env = assert(args["--env"], "--env is missing")
   const name = assert(args["--name"], "--name is missing")
-  const value = assert(args["--value"], "--value is missing")
-  const update = !!args['--update']
+
+  const hasValue = !!args["--value"]
+  const hasUpdate = !!args["--update"]
+  const hasDelete = !!args["--delete"]
+
+  if (hasDelete && hasValue) {
+    throw new Error("Cannot use --delete with --value")
+  } else if (!hasDelete && !hasValue) {
+    throw new Error("You must provide either --value or --delete")
+  }
+
+  if (hasDelete && hasUpdate) {
+    throw new Error("Cannot use --delete with --update")
+  }
+
+  const value = hasValue ? args["--value"]! : ""
 
   const fileContent = [env, name, value].join("\n")
 
@@ -23,9 +38,11 @@ export default async function () {
 
   const signed = await signGpgCleartext(fileContent)
 
-  console.log("> Uploading the parameter...")
+  if (hasDelete) console.log("> Deleting the parameter...")
+  else console.log("> Uploading the parameter...")
+
   const res = await fetch(`https://ops-lambdas.decentraland.${envDomain}/parameters-manager`, {
-    method: update ? "PUT" : "POST",
+    method: hasDelete ? "DELETE" : hasUpdate ? "PUT" : "POST",
     body: signed.toString(),
   })
 
