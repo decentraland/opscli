@@ -11,11 +11,7 @@ async function checkFileExists(file: string): Promise<boolean> {
   return fs.promises.access(file, fs.constants.F_OK).then(() => true).catch(() => false)
 }
 
-export async function createFileWriter(
-  // components: Pick<AppComponents, 'logs' | 'staticConfigs' | 'fs' | 'storage'>,
-  // filenamePrefix?: string
-  filename: string
-): Promise<IFile> {
+export async function createFileWriter(filename: string): Promise<IFile> {
   const filePath = path.resolve(filename)
 
   // if the process failed while creating the snapshot last time the file may still exists
