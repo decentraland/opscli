@@ -12,6 +12,7 @@ export default async () => {
     "--snapshot": String,
     "--content-server": String,
     "--start-position": String,
+    "--start-date": String,
     "--grep": String,
     "--ab-server": String,
     "--token": String
@@ -49,6 +50,7 @@ export default async () => {
   console.log(`  File length ${(len / 1024 / 1024).toFixed(1)}MB`)
 
   let currentCursor = (args['--start-position'] ? jsonNd.indexOf(args['--start-position']) : 0) || -1
+  const startDate = (args['--start-date'] ? new Date(args['--start-date']).getTime() : 0) || -1
   let nextCursor = 0
   while ((nextCursor = jsonNd.indexOf('\n', currentCursor + 1)) != -1) {
     const line = jsonNd.substring(currentCursor, nextCursor)
@@ -64,20 +66,21 @@ export default async () => {
 
       const entity = JSON.parse(line)
 
+      if (startDate <= entity.localTimestamp) {
+        await queueConversion(abServer, {
+          entity: {
+            entityId: entity.entityId, authChain: [
+              {
+                type: AuthLinkType.SIGNER,
+                payload: '0x0000000000000000000000000000000000000000',
+                signature: ''
+              }
+            ]
+          }, contentServerUrls: [contentUrl]
+        }, token)
 
-      await queueConversion(abServer, {
-        entity: {
-          entityId: entity.entityId, authChain: [
-            {
-              type: AuthLinkType.SIGNER,
-              payload: '0x0000000000000000000000000000000000000000',
-              signature: ''
-            }
-          ]
-        }, contentServerUrls: [contentUrl]
-      }, token)
-
-      console.log(`[${percent}%]`, entity.entityId, entity.pointers[0])
+        console.log(`[${percent}%]`, entity.entityId, entity.pointers[0])
+      }
     }
   }
 
