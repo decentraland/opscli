@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-export class CliError extends Error {}
+export class CliError extends Error { }
 
 const commands = {
   "query-rollout": "./commands/query-rollout",
@@ -14,7 +14,8 @@ const commands = {
   "queue-ab-conversion": "./commands/queue-ab-conversion",
   "check-ab-conversion": "./commands/check-ab-conversion",
   "queue-ab-conversion-snapshot": "./commands/queue-ab-conversion-snapshot",
-  "circleci": "./commands/circleci"
+  "circleci": "./commands/circleci",
+  "concat-snapshots": "./commands/concat-snapshots",
 }
 
 async function main() {
@@ -23,9 +24,9 @@ async function main() {
   if (!commandName || !commands[commandName]) {
     throw new CliError(
       "Invalid command. Possible are:\n" +
-        Object.keys(commands)
-          .map(($) => "  npx @dcl/opscli " + $ + "\n")
-          .join("")
+      Object.keys(commands)
+        .map(($) => "  npx @dcl/opscli " + $ + "\n")
+        .join("")
     )
   }
 
