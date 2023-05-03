@@ -11,6 +11,9 @@ name: CI
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@master
       - name: Use Node.js 18.x
@@ -36,5 +39,7 @@ jobs:
           access: public
           deterministic-snapshot: true
           main-branch-latest-tag: true
+          ## sign the deployment
+          provenance: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
