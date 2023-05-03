@@ -32,57 +32,99 @@ export default async () => {
   console.log(`         Asset bundle server: ${abServer}`)
 
   console.log(`> Fetching snapshots`)
-  const snapshotReq = await fetch(`${contentUrl}/snapshot`)
-  if (!snapshotReq.ok) throw new CliError(`Invalid snapshot response from ${contentUrl}/snapshot`)
+  const snapshotReq = await fetch(`${contentUrl}/snapshots`)
+  if (!snapshotReq.ok) throw new CliError(`Invalid snapshot response from ${contentUrl}/snapshots`)
 
-  const snapshotsJson = await snapshotReq.json() as any
-
-  if (!(snapshot in snapshotsJson.entities)) throw new CliError(`Invalid snapshot ${snapshot}`)
-  const hash = snapshotsJson.entities[snapshot].hash
-
-  console.log(`> Fetching file ${hash}`)
-
-  const jsonNdReq = await fetch(`${contentUrl}/contents/${hash}`)
-  if (!jsonNdReq.ok) throw new CliError(`Invalid response from ${contentUrl}/contents/${hash}`)
-  const jsonNd = await jsonNdReq.text()
-
-  const len = jsonNd.length
-  console.log(`  File length ${(len / 1024 / 1024).toFixed(1)}MB`)
-
-  let currentCursor = (args['--start-position'] ? jsonNd.indexOf(args['--start-position']) : 0) || -1
+  const snapshotsJson = await snapshotReq.json() as Array<any>
   const startDate = (args['--start-date'] ? new Date(args['--start-date']).getTime() : 0) || -1
-  let nextCursor = 0
-  while ((nextCursor = jsonNd.indexOf('\n', currentCursor + 1)) != -1) {
-    const line = jsonNd.substring(currentCursor, nextCursor)
-    currentCursor = nextCursor
-    if (line.trim().startsWith('{')) {
-      const percent = (100 * (nextCursor / len)).toFixed(2)
+  let snapshotEntitiesToProcess = Array<any>()
 
-      if (args['--grep']) {
-        if (!line.match(args['--grep'])) {
-          continue
-        }
+  // select valid snapshots based on the start date
+  for (let i = 0; i < snapshotsJson.length; i++)
+  {
+    const value = snapshotsJson[i]
+    const fromTime = value.timeRange.initTimestamp
+    const toTime = value.timeRange.endTimestamp
+    
+    if (toTime >= startDate)
+    {
+      snapshotEntitiesToProcess.push(value)
+    } 
+  }
+
+  const snapshotsCount = snapshotEntitiesToProcess.length;
+  if (snapshotsCount == 0)
+  {
+    throw new CliError(`No snapshot entity found at time ${startDate}`)
+  }
+
+  let startPosition = -1
+  let argStartPosition = args['--start-position']
+
+  for (let i = 0; i < snapshotsCount; i++)
+  {
+    const hash = snapshotEntitiesToProcess[i].hash;
+
+    console.log(`> (${i+1}/${snapshotsCount}) Fetching file ${hash} with ${snapshotEntitiesToProcess[i].numberOfEntities} entities`)
+  
+    const jsonNdReq = await fetch(`${contentUrl}/contents/${hash}`)
+    if (!jsonNdReq.ok) throw new CliError(`Invalid response from ${contentUrl}/contents/${hash}`)
+    const jsonNd = await jsonNdReq.text()
+  
+    const len = jsonNd.length
+    console.log(`  File length ${(len / 1024 / 1024).toFixed(1)}MB`)
+  
+    let currentCursor = -1
+    if (startPosition < 0)
+    {
+      startPosition = (argStartPosition ? jsonNd.indexOf(argStartPosition) : 0) || 0
+      if (startPosition >= 0)
+      {
+        // after the start position is found, the next start position will always be 0
+        currentCursor = startPosition
+        startPosition = 0
       }
-
-      const entity = JSON.parse(line)
-
-      if (startDate <= entity.localTimestamp) {
-        await queueConversion(abServer, {
-          entity: {
-            entityId: entity.entityId, authChain: [
-              {
-                type: AuthLinkType.SIGNER,
-                payload: '0x0000000000000000000000000000000000000000',
-                signature: ''
-              }
-            ]
-          }, contentServerUrls: [contentUrl]
-        }, token)
-
-        console.log(`[${percent}%]`, entity.entityId, entity.pointers[0])
+    } else {
+      currentCursor = startPosition
+    }
+    if (currentCursor < 0)
+    {
+      console.log(`  skipped because of --start-position`)
+      continue
+    }
+  
+    let nextCursor = 0
+    while ((nextCursor = jsonNd.indexOf('\n', currentCursor + 1)) != -1) {
+      const line = jsonNd.substring(currentCursor, nextCursor)
+      currentCursor = nextCursor
+      if (line.trim().startsWith('{')) {
+        const percent = (100 * (nextCursor / len)).toFixed(2)
+  
+        if (args['--grep']) {
+          if (!line.match(args['--grep'])) {
+            continue
+          }
+        }
+  
+        const entity = JSON.parse(line)
+        if (startDate <= entity.entityTimestamp && entity.entityType == snapshot) {
+          let prom = await queueConversion(abServer, {
+            entity: {
+              entityId: entity.entityId, authChain: [
+                {
+                  type: AuthLinkType.SIGNER,
+                  payload: '0x0000000000000000000000000000000000000000',
+                  signature: ''
+                }
+              ]
+            }, contentServerUrls: [contentUrl]
+          }, token)
+          
+          console.log(`  (${i+1}/${snapshotsCount}) [${percent}%]`, entity.entityId, entity.pointers[0])
+        }
       }
     }
   }
-
+  
   console.log(`Finished!`)
 }
