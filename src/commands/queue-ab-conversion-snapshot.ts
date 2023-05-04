@@ -81,9 +81,11 @@ export default async () => {
           if (entity.entityId == argStartPosition)
           {
             shouldSkipUntilStartPosition = false
+          } else 
+          {
+            return;
           }
         }
-        if (shouldSkipUntilStartPosition) return
 
         if (startDate <= entity.entityTimestamp && entity.entityType == snapshot) {
           await queueConversion(abServer, {
