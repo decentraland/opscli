@@ -4,6 +4,7 @@ import { fetch } from "undici"
 import { CliError } from "../bin"
 import { assert } from "../helpers/assert"
 import { queueConversion } from "../helpers/asset-bundles"
+import { StringDecoder } from "string_decoder"
 
 // PROCESS AN ENTIRE SNAPSHOT
 
@@ -43,7 +44,6 @@ export default async () => {
   for (let i = 0; i < snapshotsJson.length; i++)
   {
     const value = snapshotsJson[i]
-    const fromTime = value.timeRange.initTimestamp
     const toTime = value.timeRange.endTimestamp
     
     if (toTime >= startDate)
@@ -58,57 +58,37 @@ export default async () => {
     throw new CliError(`No snapshot entity found at time ${startDate}`)
   }
 
-  let startPosition = -1
   let argStartPosition = args['--start-position']
+  let argGrep = args['--grep']
+  let shouldSkipUntilStartPosition = argStartPosition || false
 
   for (let i = 0; i < snapshotsCount; i++)
   {
     const hash = snapshotEntitiesToProcess[i].hash;
+    const numberOfEntities = snapshotEntitiesToProcess[i].numberOfEntities
+    console.log(`> (${i+1}/${snapshotsCount}) Fetching file ${hash} with ${numberOfEntities} entities`)
+    const snapshotUrl = `${contentUrl}/contents/${hash}`
+    
+    await processSnapshot(snapshotUrl, async (line, index) => {
+      const percent = (100 * (index / numberOfEntities)).toFixed(2)
+      try {
+        if (argGrep&& !line.match(argGrep)) return
 
-    console.log(`> (${i+1}/${snapshotsCount}) Fetching file ${hash} with ${snapshotEntitiesToProcess[i].numberOfEntities} entities`)
-  
-    const jsonNdReq = await fetch(`${contentUrl}/contents/${hash}`)
-    if (!jsonNdReq.ok) throw new CliError(`Invalid response from ${contentUrl}/contents/${hash}`)
-    const jsonNd = await jsonNdReq.text()
-  
-    const len = jsonNd.length
-    console.log(`  File length ${(len / 1024 / 1024).toFixed(1)}MB`)
-  
-    let currentCursor = -1
-    if (startPosition < 0)
-    {
-      startPosition = (argStartPosition ? jsonNd.indexOf(argStartPosition) : 0) || 0
-      if (startPosition >= 0)
-      {
-        // after the start position is found, the next start position will always be 0
-        currentCursor = startPosition
-        startPosition = 0
-      }
-    } else {
-      currentCursor = startPosition
-    }
-    if (currentCursor < 0)
-    {
-      console.log(`  skipped because of --start-position`)
-      continue
-    }
-  
-    let nextCursor = 0
-    while ((nextCursor = jsonNd.indexOf('\n', currentCursor + 1)) != -1) {
-      const line = jsonNd.substring(currentCursor, nextCursor)
-      currentCursor = nextCursor
-      if (line.trim().startsWith('{')) {
-        const percent = (100 * (nextCursor / len)).toFixed(2)
-  
-        if (args['--grep']) {
-          if (!line.match(args['--grep'])) {
-            continue
+        const entity = JSON.parse(line)
+
+        if (shouldSkipUntilStartPosition)
+        {
+          if (entity.entityId == argStartPosition)
+          {
+            shouldSkipUntilStartPosition = false
+          } else 
+          {
+            return;
           }
         }
-  
-        const entity = JSON.parse(line)
+
         if (startDate <= entity.entityTimestamp && entity.entityType == snapshot) {
-          let prom = await queueConversion(abServer, {
+          await queueConversion(abServer, {
             entity: {
               entityId: entity.entityId, authChain: [
                 {
@@ -119,12 +99,53 @@ export default async () => {
               ]
             }, contentServerUrls: [contentUrl]
           }, token)
-          
+
           console.log(`  (${i+1}/${snapshotsCount}) [${percent}%]`, entity.entityId, entity.pointers[0])
         }
+      } catch (error) {
+        console.log(error)
       }
-    }
+    })
   }
   
   console.log(`Finished!`)
 }
+
+const processSnapshot = async (url:any, processLine: (line:string, index:number) => Promise<void>) => {
+  const decoder = new StringDecoder('utf8');
+  let remaining = '';
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new CliError(`Invalid response from ${url}`)
+
+    let index = 0
+    for await (const data of response.body) {
+      const chunk = decoder.write(data);
+      const lines = (remaining + chunk).split('\n');
+
+      if (!chunk.endsWith('\n')) {
+        remaining = lines.pop()!;
+      } else {
+        remaining = '';
+      }
+
+      for (const line of lines) {
+        if (line.trim().startsWith('{')) {
+          await processLine(line, index)
+        }
+        index++
+        process.stdout.write(index + '\r')
+      }
+    }
+
+    if (remaining) {
+      if (remaining.trim().startsWith('{')) {
+        await processLine(remaining, index)
+      }
+    }
+
+  } catch (error) {
+    console.error(`Failed to download file: ${error}`);
+  }
+};
