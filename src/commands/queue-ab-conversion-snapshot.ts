@@ -9,8 +9,6 @@ import { StringDecoder } from "string_decoder"
 // PROCESS AN ENTIRE SNAPSHOT
 
 export default async () => {
-
-
   const args = arg({
     "--snapshot": String,
     "--content-server": String,
@@ -71,7 +69,7 @@ export default async () => {
     console.log(`> (${i+1}/${snapshotsCount}) Fetching file ${hash} with ${numberOfEntities} entities`)
     const snapshotUrl = `${contentUrl}/contents/${hash}`
     
-    await processSnapshot(snapshotUrl, numberOfEntities, async (line, index) => {
+    await processSnapshot(snapshotUrl, async (line, index) => {
       const percent = (100 * (index / numberOfEntities)).toFixed(2)
       try {
         if (argGrep&& !line.match(argGrep)) return
@@ -111,14 +109,12 @@ export default async () => {
   console.log(`Finished!`)
 }
 
-const processSnapshot = async (url:any, numberOfEntities:number, processLine: (line:string, index:number) => Promise<void>) => {
+const processSnapshot = async (url:any, processLine: (line:string, index:number) => Promise<void>) => {
   const decoder = new StringDecoder('utf8');
   let remaining = '';
 
   try {
-    
     const response = await fetch(url);
-
     if (!response.ok) throw new CliError(`Invalid response from ${url}`)
 
     let index = 0
