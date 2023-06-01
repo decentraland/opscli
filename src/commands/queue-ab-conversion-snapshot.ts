@@ -32,6 +32,15 @@ export default async () => {
   console.log(`              Content server: ${contentUrl}`)
   console.log(`         Asset bundle server: ${abServer}`)
 
+
+  if (snapshot == "worlds")
+  {
+    console.log(`Processing worlds`)
+    await processWorlds(abServer, token);
+    console.log(`Finished!`)
+    return;
+  }
+
   console.log(`> Fetching snapshots`)
   const snapshotReq = await fetch(`${contentUrl}/snapshots`)
   if (!snapshotReq.ok) throw new CliError(`Invalid snapshot response from ${contentUrl}/snapshots`)
@@ -110,6 +119,47 @@ export default async () => {
   
   console.log(`Finished!`)
 }
+
+const processWorlds = async (abServer : string, token:string ) => {
+  const worldsIndexUrl = 'https://worlds-content-server.decentraland.org/index'
+  const worldsContentUrl = 'https://worlds-content-server.decentraland.org/'
+
+  const worldsReq = await fetch(worldsIndexUrl)
+  if (!worldsReq.ok) throw new CliError(`Invalid response from ${worldsIndexUrl}`)
+  const worldsJson = await worldsReq.json() as any
+  if (!worldsJson.data) throw new CliError(`Json has invalid format`)
+  const worlds = worldsJson.data as Array<any>
+  const worldsCount = worlds.length
+
+  for (let i = 0; i < worldsCount; i++)
+  {
+    const percent = (100 * (i / worldsCount)).toFixed(2)
+    const world = worlds[i]
+    const name = world.name
+    const scenes = world.scenes as Array<any>
+
+    for (let j = 0; j < scenes.length; j++)
+    {
+      const scene = scenes[j]
+      
+      console.log(`> [${percent}%]`, name, scene.id)
+
+      await queueConversion(abServer, {
+        entity: {
+          entityId: scene.id, authChain: [
+            {
+              type: AuthLinkType.SIGNER,
+              payload: '0x0000000000000000000000000000000000000000',
+              signature: ''
+            }
+          ]
+        }, contentServerUrls: [worldsContentUrl]
+      }, token)
+    }
+
+  }
+  
+};
 
 const processSnapshot = async (url:any, processLine: (line:string, index:number) => Promise<void>) => {
   const decoder = new StringDecoder('utf8');
