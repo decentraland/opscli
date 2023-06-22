@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "prestart": "make build-ts",
+    "prestart": "make build",
     "start": "./dist/bin.js"
   },
   "repository": {
