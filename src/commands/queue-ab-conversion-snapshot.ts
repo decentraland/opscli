@@ -5,6 +5,7 @@ import { CliError } from "../bin"
 import { assert } from "../helpers/assert"
 import { queueConversion } from "../helpers/asset-bundles"
 import { StringDecoder } from "string_decoder"
+import { exit } from "process"
 
 // PROCESS AN ENTIRE SNAPSHOT
 
@@ -97,27 +98,44 @@ export default async () => {
         }
 
         if (startDate <= entity.entityTimestamp && entity.entityType == snapshot) {
-          await queueConversion(abServer, {
-            entity: {
-              entityId: entity.entityId, authChain: [
-                {
-                  type: AuthLinkType.SIGNER,
-                  payload: '0x0000000000000000000000000000000000000000',
-                  signature: ''
-                }
-              ]
-            }, contentServerUrls: [contentUrl]
-          }, token)
-
+          await tryRetryQueueConversion(abServer, entity.entityId, contentUrl, token);
           console.log(`  (${i+1}/${snapshotsCount}) [${percent}%]`, entity.entityId, entity.pointers[0])
         }
       } catch (error) {
         console.log(error)
+        exit(1)
       }
     })
   }
   
   console.log(`Finished!`)
+}
+
+const tryRetryQueueConversion = async(abServer:string, entityId:string, contentUrl: string, token:string, retryCount:number = 0 ) => {
+  if (retryCount > 3)
+  {
+
+    console.log(`> ${abServer} ${entityId} retry count exceeded, please check your connection.`)
+    exit(1)
+  }
+  try {
+    await queueConversion(abServer, {
+      entity: {
+        entityId: entityId, authChain: [
+          {
+            type: AuthLinkType.SIGNER,
+            payload: '0x0000000000000000000000000000000000000000',
+            signature: ''
+          }
+        ]
+      }, contentServerUrls: [contentUrl]
+    }, token)
+  } catch (error)
+  {
+    console.log(`> Unexpected error, retrying in 5 seconds...`)
+    await new Promise(f => setTimeout(f, 5000));
+    tryRetryQueueConversion(abServer, entityId, contentUrl, token, retryCount+1);
+  }
 }
 
 const processWorlds = async (abServer : string, token:string ) => {
@@ -144,17 +162,7 @@ const processWorlds = async (abServer : string, token:string ) => {
       
       console.log(`> [${percent}%]`, name, scene.id)
 
-      await queueConversion(abServer, {
-        entity: {
-          entityId: scene.id, authChain: [
-            {
-              type: AuthLinkType.SIGNER,
-              payload: '0x0000000000000000000000000000000000000000',
-              signature: ''
-            }
-          ]
-        }, contentServerUrls: [worldsContentUrl]
-      }, token)
+      await tryRetryQueueConversion(abServer, scene.id, worldsContentUrl, token);
     }
 
   }
