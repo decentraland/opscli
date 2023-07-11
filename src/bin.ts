@@ -14,6 +14,7 @@ const commands = {
   "queue-ab-conversion": "./commands/queue-ab-conversion",
   "check-ab-conversion": "./commands/check-ab-conversion",
   "queue-ab-conversion-snapshot": "./commands/queue-ab-conversion-snapshot",
+  "queue-ab-conversion-about": "./commands/queue-ab-conversion-about",
   "circleci": "./commands/circleci",
   "concat-snapshots": "./commands/concat-snapshots",
 }
