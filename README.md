@@ -24,6 +24,15 @@ npx @dcl/opscli queue-ab-conversion \
   [--content-server https://peer.decentraland.org/content]
 ```
 
+### Schedule asset bundle conversion from custom about
+
+```
+npx @dcl/opscli queue-ab-conversion-about \
+  --token <ACCESS_TOKEN> \
+  --about-url https://sdk-team-cdn.decentraland.org/ipfs/goerli-plaza-main/about \
+  [--ab-server https://asset-bundle-converter.decentraland.org]
+```
+
 ### Check status of conversion
 
 ```
