@@ -10,17 +10,20 @@ export default async () => {
   const args = arg({
     "--about-url": String,
     "--ab-server": String,
-    "--token": String
+    "--token": String,
+    "--force": Boolean,
   })
 
   const aboutUrl = args["--about-url"]!
   const token = args["--token"]!
   const abServer = args["--ab-server"] || "https://asset-bundle-converter.decentraland.org"
+  const force = args["--force"] || false
 
   assert(!!token, "--token is missing")
 
   console.log(`>                 Parameters:`)
   console.log(`         Asset bundle server: ${abServer}`)
+  console.log(`               Force rebuild: ${force}`)
 
   const aboutReq = await fetch(aboutUrl)
   if (!aboutReq.ok) throw new CliError(`Invalid response from ${aboutUrl}`)
@@ -39,7 +42,8 @@ export default async () => {
             signature: ''
           }
         ]
-      }, contentServerUrls: [parsed.baseUrl || "https://peer.decentraland.org/content"]
+      }, contentServerUrls: [parsed.baseUrl || "https://peer.decentraland.org/content"],
+      force
     }, token)
     console.log(`  Result: ${JSON.stringify(result)}`)
   }
