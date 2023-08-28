@@ -46,7 +46,7 @@ export default async () => {
   if (snapshot == "worlds")
   {
     console.log(`Processing worlds`)
-    await processWorlds(abServer, token);
+    await processWorlds(abServers, token);
     console.log(`Finished!`)
     return;
   }
@@ -130,7 +130,7 @@ export default async () => {
   console.log(`Finished!`)
 }
 
-const processWorlds = async (abServer : string, token:string ) => {
+const processWorlds = async (abServers : string[], token:string ) => {
   const worldsIndexUrl = 'https://worlds-content-server.decentraland.org/index'
   const worldsContentUrl = 'https://worlds-content-server.decentraland.org/'
 
@@ -154,7 +154,7 @@ const processWorlds = async (abServer : string, token:string ) => {
       
       console.log(`> [${percent}%]`, name, scene.id)
 
-      await queueConversion(abServer, {
+      await queueConversions(abServers, {
         entity: {
           entityId: scene.id, authChain: [
             {
