@@ -3,7 +3,7 @@ import arg from "arg"
 import { fetch } from "undici"
 import { CliError } from "../bin"
 import { assert } from "../helpers/assert"
-import { queueConversion } from "../helpers/asset-bundles"
+import { queueConversions} from "../helpers/asset-bundles"
 import { StringDecoder } from "string_decoder"
 
 // PROCESS AN ENTIRE SNAPSHOT
@@ -16,12 +16,22 @@ export default async () => {
     "--start-date": String,
     "--grep": String,
     "--ab-server": String,
-    "--token": String
+    "--token": String,
+    "--crossplatform": Boolean,
   })
 
   const snapshot = args["--snapshot"] || 'wearable'
   const token = args["--token"]!
   const abServer = args["--ab-server"] || "https://asset-bundle-converter.decentraland.org"
+
+  const crossplatform = args["--crossplatform"] || false
+  const abServers = crossplatform
+      ? [
+        "https://asset-bundle-converter.decentraland.org",
+        "https://asset-bundle-converter-windows.decentraland.org",
+        "https://asset-bundle-converter-mac.decentraland.org",
+      ]
+      : [abServer]
 
   assert(!!snapshot, "--snapshot is missing")
   assert(!!token, "--token is missing")
@@ -97,7 +107,7 @@ export default async () => {
         }
 
         if (startDate <= entity.entityTimestamp && entity.entityType == snapshot) {
-          await queueConversion(abServer, {
+          await queueConversions(abServers, {
             entity: {
               entityId: entity.entityId, authChain: [
                 {
