@@ -142,7 +142,6 @@ export default async () => {
 
 const processWorlds = async (abServers : string[], token:string) => {
     console.log("Processing worlds.");
-    return;
     const worldsIndexUrl = 'https://worlds-content-server.decentraland.org/index'
     const worldsContentUrl = 'https://worlds-content-server.decentraland.org/'
   
@@ -211,7 +210,7 @@ const processWorlds = async (abServers : string[], token:string) => {
                 const scene = scenes[j]
                 const percent = (100 * ((j+1) / scenes.length)).toFixed(2)
                 console.log(`> [${percent}%]`, world.name, scene.id)
-                
+
                 await queueConversions(abServers, {
                     entity: {
                     entityId: scene.id, authChain: [
