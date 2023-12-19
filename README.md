@@ -24,6 +24,23 @@ npx @dcl/opscli queue-ab-conversion \
   [--content-server https://peer.decentraland.org/content]
 ```
 
+### Schedule asset bundle conversion of all worlds
+```
+npx @dcl/opscli queue-ab-conversion-snapshot \
+  --snapshot worlds \
+  --token <ACCESS_TOKEN> \
+  [--ab-server https://asset-bundle-converter.decentraland.org]
+```
+
+### Schedule asset bundle conversion of specific world by name
+```
+npx @dcl/opscli queue-ab-conversion-snapshot \
+  --snapshot worlds \
+  --token <ACCESS_TOKEN> \
+  [--ab-server https://asset-bundle-converter.decentraland.org]
+  [--world-name <world-name.dcl.eth>]
+```
+
 ### Schedule asset bundle conversion from custom about
 
 ```
