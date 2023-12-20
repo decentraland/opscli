@@ -40,6 +40,8 @@ npx @dcl/opscli check-ab-conversion \
   --pointer "0,0" \
   --pointer "110,10" \
   [--cid "bafy....."]
+  [--ab-platform windows | mac]
+  [--ab-cdn https://ab-cdn.decentraland.org]
 ```
 
 ### `query-rollout`
