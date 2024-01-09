@@ -8,10 +8,8 @@ type Rollout = {
 }
 
 type Rollouts = {
-  map: Record<string, Rollout>
-  rollout: {
-    records: Record<string, [Rollout]>
-  }
+  rolloutMap: Record<string, Rollout>,
+  records: Record<string, [Rollout]>
 }
 
 /**
