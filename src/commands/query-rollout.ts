@@ -15,7 +15,7 @@ export default async () => {
   const rollouts = await checkRollouts(domain)
 
   console.group(`Current rollouts for domain "${domain}" for this request`)
-  console.table(rollouts.map)
+  console.table(rollouts.rolloutMap)
   console.groupEnd()
 
   const rolloutName = args["--rolloutName"]
@@ -23,7 +23,7 @@ export default async () => {
   if (rolloutName) {
     console.group(`Raw data for rollout "${rolloutName}" for domain "${domain}"`)
 
-    const rollout = rollouts.rollout.records[rolloutName]
+    const rollout = rollouts.records[rolloutName]
 
     // Simulate the distribution for 1000 sessions
     let totalSessions = 1000.0
