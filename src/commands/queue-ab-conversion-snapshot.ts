@@ -11,6 +11,7 @@ import { StringDecoder } from "string_decoder"
 export default async () => {
   const args = arg({
     "--snapshot": String,
+    "--world-name": String,
     "--content-server": String,
     "--start-position": String,
     "--start-date": String,
@@ -45,8 +46,17 @@ export default async () => {
 
   if (snapshot == "worlds")
   {
-    console.log(`Processing worlds`)
-    await processWorlds(abServers, token);
+    let specificWorld : string | undefined = args["--world-name"];
+    if(specificWorld)
+    {
+        await processWorld(abServers, token, specificWorld);
+    }
+    else
+    {
+        await processWorlds(abServers, token);
+    }
+
+
     console.log(`Finished!`)
     return;
   }
@@ -130,45 +140,92 @@ export default async () => {
   console.log(`Finished!`)
 }
 
-const processWorlds = async (abServers : string[], token:string ) => {
-  const worldsIndexUrl = 'https://worlds-content-server.decentraland.org/index'
-  const worldsContentUrl = 'https://worlds-content-server.decentraland.org/'
+const processWorlds = async (abServers : string[], token:string) => {
+    console.log("Processing worlds.");
+    const worldsIndexUrl = 'https://worlds-content-server.decentraland.org/index'
+    const worldsContentUrl = 'https://worlds-content-server.decentraland.org/'
+  
+    const worldsReq = await fetch(worldsIndexUrl)
+    if (!worldsReq.ok) throw new CliError(`Invalid response from ${worldsIndexUrl}`)
+    const worldsJson = await worldsReq.json() as any
+    if (!worldsJson.data) throw new CliError(`Json has invalid format`)
+    const worlds = worldsJson.data as Array<any>
+    const worldsCount = worlds.length
+  
+      for (let i = 0; i < worldsCount; i++)
+      {
+          const percent = (100 * (i / worldsCount)).toFixed(2)
+          const world = worlds[i]
+          const name = world.name
+          const scenes = world.scenes as Array<any>
+  
+          for (let j = 0; j < scenes.length; j++)
+          {
+          const scene = scenes[j]
+          
+          console.log(`> [${percent}%]`, name, scene.id)
+  
+          await queueConversions(abServers, {
+              entity: {
+              entityId: scene.id, authChain: [
+                  {
+                  type: AuthLinkType.SIGNER,
+                  payload: '0x0000000000000000000000000000000000000000',
+                  signature: ''
+                  }
+              ]
+              }, contentServerUrls: [worldsContentUrl]
+          }, token)
+          }
+  
+      }
+  };
 
-  const worldsReq = await fetch(worldsIndexUrl)
-  if (!worldsReq.ok) throw new CliError(`Invalid response from ${worldsIndexUrl}`)
-  const worldsJson = await worldsReq.json() as any
-  if (!worldsJson.data) throw new CliError(`Json has invalid format`)
-  const worlds = worldsJson.data as Array<any>
-  const worldsCount = worlds.length
+  const processWorld = async (abServers : string[], token:string, worldName: string) => {
+    console.log(`Processing world: ${worldName}.`);
+    const worldsIndexUrl = 'https://worlds-content-server.decentraland.org/index'
+    const worldsContentUrl = 'https://worlds-content-server.decentraland.org/'
 
-  for (let i = 0; i < worldsCount; i++)
-  {
-    const percent = (100 * (i / worldsCount)).toFixed(2)
-    const world = worlds[i]
-    const name = world.name
-    const scenes = world.scenes as Array<any>
+    const worldsReq = await fetch(worldsIndexUrl)
+    if (!worldsReq.ok) throw new CliError(`Invalid response from ${worldsIndexUrl}`)
+    const worldsJson = await worldsReq.json() as any
+    if (!worldsJson.data) throw new CliError(`Json has invalid format`)
+    const worlds = worldsJson.data as Array<any>
+    const worldsCount = worlds.length
 
-    for (let j = 0; j < scenes.length; j++)
+    if(worldName)
     {
-      const scene = scenes[j]
-      
-      console.log(`> [${percent}%]`, name, scene.id)
+        const world = worlds.find(f => f.name == worldName);
+        if(!world)
+        {
+            console.error(`World ${worldName} was not found in index. Cannot process.`)
+        }
+        else
+        {
+            console.log(`World ${world.name} was found in index. Processing.`);
 
-      await queueConversions(abServers, {
-        entity: {
-          entityId: scene.id, authChain: [
+            const scenes = world.scenes as Array<any>;
+            for (let j = 0; j < scenes.length; j++)
             {
-              type: AuthLinkType.SIGNER,
-              payload: '0x0000000000000000000000000000000000000000',
-              signature: ''
+                const scene = scenes[j]
+                const percent = (100 * ((j+1) / scenes.length)).toFixed(2)
+                console.log(`> [${percent}%]`, world.name, scene.id)
+
+                await queueConversions(abServers, {
+                    entity: {
+                    entityId: scene.id, authChain: [
+                        {
+                        type: AuthLinkType.SIGNER,
+                        payload: '0x0000000000000000000000000000000000000000',
+                        signature: ''
+                        }
+                    ]
+                    }, contentServerUrls: [worldsContentUrl]
+                }, token)
             }
-          ]
-        }, contentServerUrls: [worldsContentUrl]
-      }, token)
+        }
     }
 
-  }
-  
 };
 
 const processSnapshot = async (url:any, processLine: (line:string, index:number) => Promise<void>) => {
