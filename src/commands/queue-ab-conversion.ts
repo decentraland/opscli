@@ -10,14 +10,16 @@ export default async () => {
     "--pointer": [String],
     "--content-server": String,
     "--ab-server": String,
-    "--token": String
+    "--token": String,
+    "--force": Boolean,
   })
 
   const pointers = args["--pointer"] || []
   const cids = args["--cid"] || []
   const token = args["--token"]!
   const abServer = args["--ab-server"] || "https://asset-bundle-converter.decentraland.org"
-
+  const force = args["--force"] || false
+  
   assert(!!token, "--token is missing")
   assert(pointers.length > 0 || cids.length > 0, "--pointer or --cid are required")
 
@@ -27,6 +29,7 @@ export default async () => {
   const contentUrl = (args["--content-server"] || "https://peer.decentraland.org/content").replace(/\/$/, "")
   console.log(`              Content server: ${contentUrl}`)
   console.log(`         Asset bundle server: ${abServer}`)
+  console.log(`               Force rebuild: ${force}`)
 
   const entityIdsToConvert: string[] = []
 
@@ -56,7 +59,7 @@ export default async () => {
             signature: ''
           }
         ]
-      }, contentServerUrls: [contentUrl]
+      }, contentServerUrls: [contentUrl], force,
     }, token)
     console.log(`  Result: ${JSON.stringify(result)}`)
   }
