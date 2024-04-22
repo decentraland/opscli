@@ -1,6 +1,6 @@
 import { IPFSv1, IPFSv2 } from "@dcl/schemas"
 import arg from "arg"
-import { fetch } from "undici"
+import { Response, fetch } from "undici"
 import { assert } from "../helpers/assert"
 import { getActiveEntities } from "../helpers/downloads"
 
@@ -36,9 +36,9 @@ export default async () => {
     }
   }
 
-  for (const { entityId, pointers } of entityIdsToConvert) {
-    const result = await fetch(`${abServer}/manifest/${entityId}.json`)
-    if (!result.ok) {
+  const check = async (entityId: string, pointers: string[], promise: Response) =>
+  {
+    if (!promise.ok) {
       const failManifest = await fetch(`${abServer}/manifest/${entityId}_failed.json`)
       if (failManifest.ok) {
         const manifest = await failManifest.json() as any
@@ -47,10 +47,29 @@ export default async () => {
         console.log(`🔴 ${entityId} (${pointers[0]}): Not converted!`)
       }
     } else {
-      const manifest = await result.json() as any
+      const manifest = await promise.json() as any
       console.log(`🟢 ${entityId} (${pointers[0]}): Version=${manifest.version} ExitCode=${manifest.exitCode} Date=${manifest.date}`)
     }
   }
 
+  for (const { entityId, pointers } of entityIdsToConvert) {
+    const result = await fetch(`${abServer}/manifest/${entityId}.json`)
+    const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json`)
+    const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json`)
+
+    console.log("WEBGL")
+    await check(entityId,pointers,result)
+    
+    console.log("WINDOWS")
+    await check(entityId,pointers,resultWindows)
+
+    console.log("MAC")
+    await check(entityId,pointers,resultMac)
+  }
+
   console.log(`Finished!`)
+
+  
 }
+
+
