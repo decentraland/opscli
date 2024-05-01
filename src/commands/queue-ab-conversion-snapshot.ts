@@ -217,7 +217,7 @@ const tryRetryQueueConversion = async(abServers:string[], entityId:string, conte
           }
         ]
       }, contentServerUrls: [contentUrl]
-    }, token)
+    }, token, false)
   } catch (error)
   {
     console.log(`> Unexpected error, retrying in 5 seconds...`)
