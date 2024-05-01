@@ -12,7 +12,7 @@ export async function queueConversions(assetConverterServers: string[], entity: 
 
 export async function queueConversion(assetConverterServer: string, body: DeploymentToSqs, token: string, prioritize: boolean): Promise<{ id: string }> {
   const url = `${assetConverterServer}/queue-task`
-  // if prioritize is true add prioritize: true to body
+
   if (prioritize) {
     (body as any).prioritize = true
   }
