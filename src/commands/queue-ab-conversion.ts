@@ -10,13 +10,15 @@ export default async () => {
     "--pointer": [String],
     "--content-server": String,
     "--ab-server": String,
-    "--token": String
+    "--token": String,
+    "--prioritize": Boolean
   })
 
   const pointers = args["--pointer"] || []
   const cids = args["--cid"] || []
   const token = args["--token"]!
   const abServer = args["--ab-server"] || "https://asset-bundle-converter.decentraland.org"
+  const shouldPrioritize = !!args["--prioritize"]
 
   assert(!!token, "--token is missing")
   assert(pointers.length > 0 || cids.length > 0, "--pointer or --cid are required")
@@ -57,7 +59,7 @@ export default async () => {
           }
         ]
       }, contentServerUrls: [contentUrl]
-    }, token)
+    }, token, shouldPrioritize)
     console.log(`  Result: ${JSON.stringify(result)}`)
   }
 

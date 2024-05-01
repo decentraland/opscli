@@ -20,11 +20,13 @@ export default async () => {
     "--ab-server": String,
     "--token": String,
     "--crossplatform": Boolean,
+    "--prioritize": Boolean
   })
 
   const snapshot = args["--snapshot"] || 'wearable'
   const token = args["--token"]!
   const abServer = args["--ab-server"] || "https://asset-bundle-converter.decentraland.org"
+  const shouldPrioritize = !!args["--prioritize"]
 
   const crossplatform = args["--crossplatform"] || false
   const abServers = crossplatform
@@ -50,11 +52,11 @@ export default async () => {
     let specificWorld : string | undefined = args["--world-name"];
     if(specificWorld)
     {
-        await processWorld(abServers, token, specificWorld);
+        await processWorld(abServers, token, specificWorld, shouldPrioritize);
     }
     else
     {
-        await processWorlds(abServers, token);
+        await processWorlds(abServers, token, shouldPrioritize);
     }
 
 
@@ -120,7 +122,7 @@ export default async () => {
 
         if (startDate <= entity.entityTimestamp && entity.entityType == snapshot) {
 
-          await tryRetryQueueConversion(abServers, entity.entityId, contentUrl, token)
+          await tryRetryQueueConversion(abServers, entity.entityId, contentUrl, token, shouldPrioritize)
           
           console.log(`  (${i+1}/${snapshotsCount}) [${percent}%]`, entity.entityId, entity.pointers[0])
         }
@@ -133,7 +135,7 @@ export default async () => {
   console.log(`Finished!`)
 }
 
-const processWorlds = async (abServers : string[], token:string) => {
+const processWorlds = async (abServers : string[], token:string, prioritize: boolean) => {
     console.log("Processing worlds.");
     const worldsIndexUrl = 'https://worlds-content-server.decentraland.org/index'
     const worldsContentUrl = 'https://worlds-content-server.decentraland.org/'
@@ -158,12 +160,12 @@ const processWorlds = async (abServers : string[], token:string) => {
             
             console.log(`> [${percent}%]`, name, scene.id)
     
-            await tryRetryQueueConversion(abServers, scene.id, worldsContentUrl, token)
+            await tryRetryQueueConversion(abServers, scene.id, worldsContentUrl, token, prioritize)
           }
       }
   };
 
-  const processWorld = async (abServers : string[], token:string, worldName: string) => {
+  const processWorld = async (abServers : string[], token:string, worldName: string, prioritize: boolean) => {
     console.log(`Processing world: ${worldName}.`);
     const worldsIndexUrl = 'https://worlds-content-server.decentraland.org/index'
     const worldsContentUrl = 'https://worlds-content-server.decentraland.org/'
@@ -193,14 +195,14 @@ const processWorlds = async (abServers : string[], token:string) => {
                 const percent = (100 * ((j+1) / scenes.length)).toFixed(2)
                 console.log(`> [${percent}%]`, world.name, scene.id)
 
-                await tryRetryQueueConversion(abServers, scene.id, worldsContentUrl, token)
+                await tryRetryQueueConversion(abServers, scene.id, worldsContentUrl, token, prioritize)
             }
         }
     }
 
 };
 
-const tryRetryQueueConversion = async(abServers:string[], entityId:string, contentUrl: string, token:string, retryCount:number = 0 ) => {
+const tryRetryQueueConversion = async(abServers:string[], entityId:string, contentUrl: string, token:string, prioritize: boolean, retryCount:number = 0 ) => {
   if (retryCount > 3)
   {
     console.log(`> ${abServers} ${entityId} retry count exceeded, please check your connection.`)
@@ -217,12 +219,12 @@ const tryRetryQueueConversion = async(abServers:string[], entityId:string, conte
           }
         ]
       }, contentServerUrls: [contentUrl]
-    }, token)
+    }, token, prioritize)
   } catch (error)
   {
     console.log(`> Unexpected error, retrying in 5 seconds...`)
     await new Promise(f => setTimeout(f, 5000));
-    tryRetryQueueConversion(abServers, entityId, contentUrl, token, retryCount+1);
+    tryRetryQueueConversion(abServers, entityId, contentUrl, token, prioritize, retryCount+1);
   }
 }
 

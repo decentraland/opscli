@@ -13,6 +13,7 @@ export default async () => {
     "--token": String,
     "--force": Boolean,
     "--crossplatform": Boolean,
+    "--prioritize": Boolean
   })
 
   const aboutUrl = args["--about-url"]!
@@ -21,6 +22,7 @@ export default async () => {
   const force = args["--force"] || false
 
   const crossplatform = args["--crossplatform"] || false
+  const shouldPrioritize = !!args["--prioritize"]
 
   const abServers = crossplatform
     ? [
@@ -60,7 +62,8 @@ export default async () => {
         contentServerUrls: [parsed.baseUrl || "https://peer.decentraland.org/content"],
         force,
       },
-      token
+      token,
+      shouldPrioritize
     )
     console.log(`  Result: ${JSON.stringify(result)}`)
   }
