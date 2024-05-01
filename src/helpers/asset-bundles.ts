@@ -10,11 +10,16 @@ export async function queueConversions(assetConverterServers: string[], entity: 
   return ids
 }
 
-export async function queueConversion(assetConverterServer: string, entity: DeploymentToSqs, token: string): Promise<{ id: string }> {
+export async function queueConversion(assetConverterServer: string, body: DeploymentToSqs, token: string, prioritize: boolean): Promise<{ id: string }> {
   const url = `${assetConverterServer}/queue-task`
+  // if prioritize is true add prioritize: true to body
+  if (prioritize) {
+    body.prioritize = true
+  }
+  
   const res = await fetch(url, {
     method: "post",
-    body: JSON.stringify(entity),
+    body: JSON.stringify(body),
     headers: {
       "content-type": "application/json",
       Authorization: token
