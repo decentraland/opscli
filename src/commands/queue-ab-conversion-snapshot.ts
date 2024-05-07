@@ -131,7 +131,7 @@ export default async () => {
   console.log(`Finished!`)
 }
 
-const processWorlds = async (abServer : string, token:string, prioritize: boolean) => {
+const processWorlds = async (customABServer : string, token:string, prioritize: boolean) => {
     console.log("Processing worlds.");
     const worldsIndexUrl = 'https://worlds-content-server.decentraland.org/index'
     const worldsContentUrl = 'https://worlds-content-server.decentraland.org/'
@@ -156,7 +156,7 @@ const processWorlds = async (abServer : string, token:string, prioritize: boolea
             
             console.log(`> [${percent}%]`, name, scene.id)
     
-            await tryRetryQueueConversion(abServer, scene.id, worldsContentUrl, token, prioritize)
+            await tryRetryQueueConversion(customABServer, scene.id, worldsContentUrl, token, prioritize)
           }
       }
   };
