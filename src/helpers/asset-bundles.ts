@@ -2,10 +2,21 @@ import { DeploymentToSqs } from "@dcl/schemas/dist/misc/deployments-to-sqs"
 import { fetch } from "undici"
 import { CliError } from "../bin"
 
-export async function queueConversions(assetConverterServers: string[], entity: DeploymentToSqs, token: string, prioritize: boolean): Promise<Array<{ id: string }>> {
+
+const abServers =  [
+  "https://asset-bundle-converter.decentraland.org",
+  "https://asset-bundle-converter-windows.decentraland.org",
+  "https://asset-bundle-converter-mac.decentraland.org",
+]
+export async function queueConversions(customABConverterServer: string, entity: DeploymentToSqs, token: string, prioritize: boolean): Promise<Array<{ id: string }>> {
   let ids: Array<{ id: string }> = []
-  for (const assetConverterServer of assetConverterServers) {
-    ids.push(await queueConversion(assetConverterServer, entity, token, prioritize))
+
+  if (customABConverterServer === null || customABConverterServer === "") {
+    for (const assetConverterServer of abServers) {
+      ids.push(await queueConversion(assetConverterServer, entity, token, prioritize))
+    }
+  }else{
+    ids.push(await queueConversion(customABConverterServer, entity, token, prioritize))
   }
   return ids
 }
