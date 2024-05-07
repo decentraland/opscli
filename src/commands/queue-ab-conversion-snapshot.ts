@@ -3,7 +3,7 @@ import arg from "arg"
 import { fetch } from "undici"
 import { CliError } from "../bin"
 import { assert } from "../helpers/assert"
-import { queueConversions} from "../helpers/asset-bundles"
+import { multiPlatformFlag, queueConversions } from "../helpers/asset-bundles"
 import { StringDecoder } from "string_decoder"
 import { exit } from "process"
 
@@ -24,7 +24,7 @@ export default async () => {
 
   const snapshot = args["--snapshot"] || 'wearable'
   const token = args["--token"]!
-  const abServer = args["--ab-server"] || null
+  const abServer = args["--ab-server"] || multiPlatformFlag
   const shouldPrioritize = !!args["--prioritize"]
 
 
@@ -37,7 +37,7 @@ export default async () => {
   const contentUrl = (args["--content-server"] || "https://peer.decentraland.org/content").replace(/\/$/, "")
   console.log(`                 Entity type: ${snapshot}`)
   console.log(`              Content server: ${contentUrl}`)
-  if (abServer === null || abServer === "") {
+  if (abServer !== multiPlatformFlag) {
     console.log(`         Asset bundle server: Windows, Mac, WebGL`)
   }else{
     console.log(`         Asset bundle server: ${JSON.stringify(abServer)}`)

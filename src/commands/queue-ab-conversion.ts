@@ -1,7 +1,7 @@
 import { AuthLinkType, IPFSv1, IPFSv2 } from "@dcl/schemas"
 import arg from "arg"
 import { assert } from "../helpers/assert"
-import { queueConversions } from "../helpers/asset-bundles"
+import { multiPlatformFlag, queueConversions } from "../helpers/asset-bundles"
 import { getActiveEntities } from "../helpers/downloads"
 
 export default async () => {
@@ -17,7 +17,7 @@ export default async () => {
   const pointers = args["--pointer"] || []
   const cids = args["--cid"] || []
   const token = args["--token"]!
-  const abServer = args["--ab-server"] || null
+  const abServer = args["--ab-server"] || multiPlatformFlag
   const shouldPrioritize = !!args["--prioritize"]
 
   assert(!!token, "--token is missing")
@@ -28,7 +28,7 @@ export default async () => {
   cids.length && console.log(`                        CIDs: ${cids.join(",")}`)
   const contentUrl = (args["--content-server"] || "https://peer.decentraland.org/content").replace(/\/$/, "")
   console.log(`              Content server: ${contentUrl}`)
-  if (abServer === null || abServer === "") {
+  if (abServer !== multiPlatformFlag) {
     console.log(`         Asset bundle server: Windows, Mac, WebGL`)
   }else{
     console.log(`         Asset bundle server: ${JSON.stringify(abServer)}`)

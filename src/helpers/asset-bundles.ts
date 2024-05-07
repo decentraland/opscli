@@ -2,6 +2,7 @@ import { DeploymentToSqs } from "@dcl/schemas/dist/misc/deployments-to-sqs"
 import { fetch } from "undici"
 import { CliError } from "../bin"
 
+export const multiPlatformFlag = "multiPlatform"
 
 const abServers =  [
   "https://asset-bundle-converter.decentraland.org",
@@ -11,7 +12,7 @@ const abServers =  [
 export async function queueConversions(customABConverterServer: string, entity: DeploymentToSqs, token: string, prioritize: boolean): Promise<Array<{ id: string }>> {
   let ids: Array<{ id: string }> = []
 
-  if (customABConverterServer === null || customABConverterServer === "") {
+  if (customABConverterServer !== multiPlatformFlag) {
     for (const assetConverterServer of abServers) {
       ids.push(await queueConversion(assetConverterServer, entity, token, prioritize))
     }

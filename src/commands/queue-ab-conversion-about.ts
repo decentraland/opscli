@@ -1,7 +1,7 @@
 import { AuthLinkType } from "@dcl/schemas"
 import arg from "arg"
 import { assert } from "../helpers/assert"
-import { queueConversions } from "../helpers/asset-bundles"
+import { multiPlatformFlag, queueConversions } from "../helpers/asset-bundles"
 import { fetch } from "undici"
 import { CliError } from "../bin"
 import { parseEntityUrn } from "../helpers/parseEntityUrn"
@@ -17,7 +17,7 @@ export default async () => {
 
   const aboutUrl = args["--about-url"]!
   const token = args["--token"]!
-  const abServer = args["--ab-server"] || null
+  const abServer = args["--ab-server"] || multiPlatformFlag
   const force = args["--force"] || false
 
   const shouldPrioritize = !!args["--prioritize"]
@@ -25,7 +25,7 @@ export default async () => {
   assert(!!token, "--token is missing")
 
   console.log(`>                 Parameters:`)
-  if (abServer === null || abServer === "") {
+  if (abServer !== multiPlatformFlag) {
     console.log(`         Asset bundle server: Windows, Mac, WebGL`)
   }else{
     console.log(`         Asset bundle server: ${JSON.stringify(abServer)}`)
