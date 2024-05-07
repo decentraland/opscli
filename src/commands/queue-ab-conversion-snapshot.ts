@@ -201,10 +201,10 @@ const processWorlds = async (customABServer : string, token:string, prioritize: 
 const tryRetryQueueConversion = async(customABServer:string, entityId:string, contentUrl: string, token:string, prioritize: boolean, retryCount:number = 0 ) => {
   if (retryCount > 3)
   {
-    if (abServer === null || abServer === "") {
-      console.log(`> All platforms ${entityId} retry count exceeded, please check your connection.`)
-    }else{
+    if (customABServer !== multiPlatformFlag) {
       console.log(`> ${customABServer} ${entityId} retry count exceeded, please check your connection.`)
+    }else{
+      console.log(`> All platforms ${entityId} retry count exceeded, please check your connection.`)
     }
     
     exit(1)
