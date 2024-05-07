@@ -1,7 +1,7 @@
 import { AuthLinkType } from "@dcl/schemas"
 import arg from "arg"
 import { assert } from "../helpers/assert"
-import { queueConversions } from "../helpers/asset-bundles"
+import { multiPlatformFlag, queueConversions } from "../helpers/asset-bundles"
 import { fetch } from "undici"
 import { CliError } from "../bin"
 import { parseEntityUrn } from "../helpers/parseEntityUrn"
@@ -12,30 +12,24 @@ export default async () => {
     "--ab-server": String,
     "--token": String,
     "--force": Boolean,
-    "--crossplatform": Boolean,
     "--prioritize": Boolean
   })
 
   const aboutUrl = args["--about-url"]!
   const token = args["--token"]!
-  const abServer = args["--ab-server"] || "https://asset-bundle-converter.decentraland.org"
+  const abServer = args["--ab-server"] || multiPlatformFlag
   const force = args["--force"] || false
 
-  const crossplatform = args["--crossplatform"] || false
   const shouldPrioritize = !!args["--prioritize"]
-
-  const abServers = crossplatform
-    ? [
-        "https://asset-bundle-converter.decentraland.org",
-        "https://asset-bundle-converter-windows.decentraland.org",
-        "https://asset-bundle-converter-mac.decentraland.org",
-      ]
-    : [abServer]
 
   assert(!!token, "--token is missing")
 
   console.log(`>                 Parameters:`)
-  console.log(`         Asset bundle server: ${JSON.stringify(abServers)}`)
+  if (abServer !== multiPlatformFlag) {
+    console.log(`         Asset bundle server: Windows, Mac, WebGL`)
+  }else{
+    console.log(`         Asset bundle server: ${JSON.stringify(abServer)}`)
+  }
   console.log(`               Force rebuild: ${force}`)
 
   const aboutReq = await fetch(aboutUrl)
@@ -47,7 +41,7 @@ export default async () => {
     const parsed = parseEntityUrn(urn)
     console.log(`> Scheduling conversion of entity ${parsed.entityId}`)
     const result = await queueConversions(
-      abServers,
+      abServer,
       {
         entity: {
           entityId: parsed.entityId,
