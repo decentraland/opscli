@@ -28,11 +28,7 @@ export default async () => {
   cids.length && console.log(`                        CIDs: ${cids.join(",")}`)
   const contentUrl = (args["--content-server"] || "https://peer.decentraland.org/content").replace(/\/$/, "")
   console.log(`              Content server: ${contentUrl}`)
-  if (abServer !== multiPlatformFlag) {
-    console.log(`         Asset bundle server: Windows, Mac, WebGL`)
-  }else{
-    console.log(`         Asset bundle server: ${JSON.stringify(abServer)}`)
-  }
+  console.log(`         Asset bundle server: ${abServer}`)
 
   const entityIdsToConvert: string[] = []
 

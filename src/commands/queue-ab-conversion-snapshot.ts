@@ -37,11 +37,7 @@ export default async () => {
   const contentUrl = (args["--content-server"] || "https://peer.decentraland.org/content").replace(/\/$/, "")
   console.log(`                 Entity type: ${snapshot}`)
   console.log(`              Content server: ${contentUrl}`)
-  if (abServer !== multiPlatformFlag) {
-    console.log(`         Asset bundle server: Windows, Mac, WebGL`)
-  }else{
-    console.log(`         Asset bundle server: ${JSON.stringify(abServer)}`)
-  }
+  console.log(`         Asset bundle server: ${abServer}`)
 
   if (snapshot == "worlds")
   {
@@ -198,19 +194,14 @@ const processWorlds = async (customABServer : string, token:string, prioritize: 
 
 };
 
-const tryRetryQueueConversion = async(customABServer:string, entityId:string, contentUrl: string, token:string, prioritize: boolean, retryCount:number = 0 ) => {
+const tryRetryQueueConversion = async(abServer:string, entityId:string, contentUrl: string, token:string, prioritize: boolean, retryCount:number = 0 ) => {
   if (retryCount > 3)
   {
-    if (customABServer !== multiPlatformFlag) {
-      console.log(`> ${customABServer} ${entityId} retry count exceeded, please check your connection.`)
-    }else{
-      console.log(`> All platforms ${entityId} retry count exceeded, please check your connection.`)
-    }
-    
+    console.log(`> ${abServer} ${entityId} retry count exceeded, please check your connection.`)
     exit(1)
   }
   try {
-    await queueConversions(customABServer, {
+    await queueConversions(abServer, {
       entity: {
         entityId: entityId, authChain: [
           {
