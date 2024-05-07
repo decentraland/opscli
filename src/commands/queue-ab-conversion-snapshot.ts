@@ -127,7 +127,7 @@ export default async () => {
   console.log(`Finished!`)
 }
 
-const processWorlds = async (customABServer : string, token:string, prioritize: boolean) => {
+const processWorlds = async (abServer : string, token:string, prioritize: boolean) => {
     console.log("Processing worlds.");
     const worldsIndexUrl = 'https://worlds-content-server.decentraland.org/index'
     const worldsContentUrl = 'https://worlds-content-server.decentraland.org/'
@@ -152,12 +152,12 @@ const processWorlds = async (customABServer : string, token:string, prioritize: 
             
             console.log(`> [${percent}%]`, name, scene.id)
     
-            await tryRetryQueueConversion(customABServer, scene.id, worldsContentUrl, token, prioritize)
+            await tryRetryQueueConversion(abServer, scene.id, worldsContentUrl, token, prioritize)
           }
       }
   };
 
-  const processWorld = async (customABServer : string, token:string, worldName: string, prioritize: boolean) => {
+  const processWorld = async (abServer : string, token:string, worldName: string, prioritize: boolean) => {
     console.log(`Processing world: ${worldName}.`);
     const worldsIndexUrl = 'https://worlds-content-server.decentraland.org/index'
     const worldsContentUrl = 'https://worlds-content-server.decentraland.org/'
@@ -187,7 +187,7 @@ const processWorlds = async (customABServer : string, token:string, prioritize: 
                 const percent = (100 * ((j+1) / scenes.length)).toFixed(2)
                 console.log(`> [${percent}%]`, world.name, scene.id)
 
-                await tryRetryQueueConversion(customABServer, scene.id, worldsContentUrl, token, prioritize)
+                await tryRetryQueueConversion(abServer, scene.id, worldsContentUrl, token, prioritize)
             }
         }
     }
@@ -216,7 +216,7 @@ const tryRetryQueueConversion = async(abServer:string, entityId:string, contentU
   {
     console.log(`> Unexpected error, retrying in 5 seconds...`)
     await new Promise(f => setTimeout(f, 5000));
-    tryRetryQueueConversion(customABServer, entityId, contentUrl, token, prioritize, retryCount+1);
+    tryRetryQueueConversion(abServer, entityId, contentUrl, token, prioritize, retryCount+1);
   }
 }
 
