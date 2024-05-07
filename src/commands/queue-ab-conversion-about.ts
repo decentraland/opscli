@@ -25,11 +25,7 @@ export default async () => {
   assert(!!token, "--token is missing")
 
   console.log(`>                 Parameters:`)
-  if (abServer !== multiPlatformFlag) {
-    console.log(`         Asset bundle server: Windows, Mac, WebGL`)
-  }else{
-    console.log(`         Asset bundle server: ${JSON.stringify(abServer)}`)
-  }
+  console.log(`         Asset bundle server: ${abServer}`)
   console.log(`               Force rebuild: ${force}`)
 
   const aboutReq = await fetch(aboutUrl)
