@@ -1,7 +1,7 @@
 import { AuthLinkType, IPFSv1, IPFSv2 } from '@dcl/schemas'
 import arg from 'arg'
 import { assert } from '../helpers/assert'
-import { multiPlatformFlag, queueConversions } from '../helpers/asset-bundles'
+import { defaultAbAdmin, Platform, queueConversions } from '../helpers/asset-bundles'
 import { getActiveEntities } from '../helpers/downloads'
 
 export default async () => {
@@ -10,6 +10,7 @@ export default async () => {
     '--pointer': [String],
     '--content-server': String,
     '--ab-server': String,
+    '--platform': [String],
     '--token': String,
     '--prioritize': Boolean
   })
@@ -17,7 +18,9 @@ export default async () => {
   const pointers = args['--pointer'] || []
   const cids = args['--cid'] || []
   const token = args['--token']!
-  const abServer = args['--ab-server'] || multiPlatformFlag
+  const abServer = args['--ab-server'] || defaultAbAdmin
+  const platforms = (args['--platform'] as Platform[]) || Object.values(Platform)
+  const contentUrl = (args['--content-server'] || 'https://peer.decentraland.org/content').replace(/\/$/, '')
   const shouldPrioritize = !!args['--prioritize']
 
   assert(!!token, '--token is missing')
@@ -25,8 +28,8 @@ export default async () => {
 
   console.log(`>                 Parameters:`)
   pointers.length && console.log(`                    Pointers: ${pointers.join(',')}`)
-  cids.length && console.log(`                        CIDs: ${cids.join(',')}`)
-  const contentUrl = (args['--content-server'] || 'https://peer.decentraland.org/content').replace(/\/$/, '')
+  cids.length && console.log(`                        CIDs: ${cids.join(', ')}`)
+  console.log(`                 Platform(s): ${platforms.join(',')}`)
   console.log(`              Content server: ${contentUrl}`)
   console.log(`         Asset bundle server: ${abServer}`)
 
@@ -65,9 +68,10 @@ export default async () => {
         contentServerUrls: [contentUrl]
       },
       token,
-      shouldPrioritize
+      shouldPrioritize,
+      platforms
     )
-    console.log(`  Result: ${JSON.stringify(result)}`)
+    console.log(`  Result:`, JSON.stringify(result, undefined, 2))
   }
 
   console.log(`Finished!`)

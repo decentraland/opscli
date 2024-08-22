@@ -2,7 +2,13 @@ import { DeploymentToSqs } from '@dcl/schemas/dist/misc/deployments-to-sqs'
 import { fetch } from 'undici'
 import { CliError } from '../bin'
 
-export const multiPlatformFlag = 'MultiPlatform'
+export const defaultAbAdmin = 'https://ab-admin.decentraland.org'
+
+export enum Platform {
+  WEBGL = 'webgl',
+  WINDOWS = 'windows',
+  MAC = 'mac'
+}
 
 const abServers = [
   'https://asset-bundle-converter.decentraland.org',
@@ -13,35 +19,34 @@ export async function queueConversions(
   customABConverterServer: string,
   entity: DeploymentToSqs,
   token: string,
-  prioritize: boolean
+  prioritize: boolean,
+  platforms: Platform[]
 ): Promise<Array<{ id: string }>> {
   const ids: Array<{ id: string }> = []
 
-  if (customABConverterServer === multiPlatformFlag) {
-    for (const assetConverterServer of abServers) {
-      ids.push(await queueConversion(assetConverterServer, entity, token, prioritize))
-    }
-  } else {
-    ids.push(await queueConversion(customABConverterServer, entity, token, prioritize))
-  }
+  ids.push(await queueConversion(customABConverterServer, entity, token, prioritize, platforms))
+
   return ids
 }
 
-export async function queueConversion(
+async function queueConversion(
   assetConverterServer: string,
   body: DeploymentToSqs,
   token: string,
-  prioritize: boolean
+  prioritize: boolean,
+  platforms: Platform[]
 ): Promise<{ id: string }> {
-  const url = `${assetConverterServer}/queue-task`
+  const url = new URL(`${assetConverterServer}/enqueue-task`)
+  platforms.forEach((platform) => url.searchParams.append('platform', platform))
 
   if (prioritize) {
     ;(body as any).prioritize = true
   }
+  console.log(`> Enqueueing task to ${url}`, JSON.stringify([body]))
 
   const res = await fetch(url, {
     method: 'post',
-    body: JSON.stringify(body),
+    body: JSON.stringify([body]),
     headers: {
       'content-type': 'application/json',
       Authorization: token

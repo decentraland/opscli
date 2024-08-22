@@ -3,7 +3,7 @@ import arg from 'arg'
 import { fetch } from 'undici'
 import { CliError } from '../bin'
 import { assert } from '../helpers/assert'
-import { multiPlatformFlag, queueConversions } from '../helpers/asset-bundles'
+import { defaultAbAdmin, Platform, queueConversions } from '../helpers/asset-bundles'
 import { StringDecoder } from 'string_decoder'
 import { exit } from 'process'
 
@@ -18,13 +18,15 @@ export default async () => {
     '--start-date': String,
     '--grep': String,
     '--ab-server': String,
+    '--platform': [String],
     '--token': String,
     '--prioritize': Boolean
   })
 
   const snapshot = args['--snapshot'] || 'wearable'
   const token = args['--token']!
-  const abServer = args['--ab-server'] || multiPlatformFlag
+  const abServer = args['--ab-server'] || defaultAbAdmin
+  const platforms = (args['--platform'] as Platform[]) || Object.values(Platform)
   const shouldPrioritize = !!args['--prioritize']
 
   assert(!!snapshot, '--snapshot is missing')
@@ -32,6 +34,7 @@ export default async () => {
 
   console.log(`>                 Parameters:`)
   const contentUrl = (args['--content-server'] || 'https://peer.decentraland.org/content').replace(/\/$/, '')
+  console.log(`                 Platform(s): ${platforms.join(',')}`)
   console.log(`                 Entity type: ${snapshot}`)
   console.log(`              Content server: ${contentUrl}`)
   console.log(`         Asset bundle server: ${abServer}`)
@@ -39,9 +42,9 @@ export default async () => {
   if (snapshot === 'worlds') {
     const specificWorld: string | undefined = args['--world-name']
     if (specificWorld) {
-      await processWorld(abServer, token, specificWorld, shouldPrioritize)
+      await processWorld(abServer, token, specificWorld, shouldPrioritize, platforms)
     } else {
-      await processWorlds(abServer, token, shouldPrioritize)
+      await processWorlds(abServer, token, shouldPrioritize, platforms)
     }
 
     console.log(`Finished!`)
@@ -97,7 +100,7 @@ export default async () => {
         }
 
         if (startDate <= entity.entityTimestamp && entity.entityType === snapshot) {
-          await tryRetryQueueConversion(abServer, entity.entityId, contentUrl, token, shouldPrioritize)
+          await tryRetryQueueConversion(abServer, entity.entityId, contentUrl, token, shouldPrioritize, platforms)
 
           console.log(`  (${i + 1}/${snapshotsCount}) [${percent}%]`, entity.entityId, entity.pointers[0])
         }
@@ -110,7 +113,7 @@ export default async () => {
   console.log(`Finished!`)
 }
 
-const processWorlds = async (abServer: string, token: string, prioritize: boolean) => {
+const processWorlds = async (abServer: string, token: string, prioritize: boolean, platforms: Platform[]) => {
   console.log('Processing worlds.')
   const worldsIndexUrl = 'https://worlds-content-server.decentraland.org/index'
   const worldsContentUrl = 'https://worlds-content-server.decentraland.org/'
@@ -133,12 +136,18 @@ const processWorlds = async (abServer: string, token: string, prioritize: boolea
 
       console.log(`> [${percent}%]`, name, scene.id)
 
-      await tryRetryQueueConversion(abServer, scene.id, worldsContentUrl, token, prioritize)
+      await tryRetryQueueConversion(abServer, scene.id, worldsContentUrl, token, prioritize, platforms)
     }
   }
 }
 
-const processWorld = async (abServer: string, token: string, worldName: string, prioritize: boolean) => {
+const processWorld = async (
+  abServer: string,
+  token: string,
+  worldName: string,
+  prioritize: boolean,
+  platforms: Platform[]
+) => {
   console.log(`Processing world: ${worldName}.`)
   const worldsIndexUrl = 'https://worlds-content-server.decentraland.org/index'
   const worldsContentUrl = 'https://worlds-content-server.decentraland.org/'
@@ -162,7 +171,7 @@ const processWorld = async (abServer: string, token: string, worldName: string, 
         const percent = (100 * ((j + 1) / scenes.length)).toFixed(2)
         console.log(`> [${percent}%]`, world.name, scene.id)
 
-        await tryRetryQueueConversion(abServer, scene.id, worldsContentUrl, token, prioritize)
+        await tryRetryQueueConversion(abServer, scene.id, worldsContentUrl, token, prioritize, platforms)
       }
     }
   }
@@ -174,6 +183,7 @@ const tryRetryQueueConversion = async (
   contentUrl: string,
   token: string,
   prioritize: boolean,
+  platforms: Platform[],
   retryCount: number = 0
 ) => {
   if (retryCount > 3) {
@@ -197,12 +207,13 @@ const tryRetryQueueConversion = async (
         contentServerUrls: [contentUrl]
       },
       token,
-      prioritize
+      prioritize,
+      platforms
     )
   } catch (error) {
     console.log(`> Unexpected error, retrying in 5 seconds...`)
     await new Promise((f) => setTimeout(f, 5000))
-    await tryRetryQueueConversion(abServer, entityId, contentUrl, token, prioritize, retryCount + 1)
+    await tryRetryQueueConversion(abServer, entityId, contentUrl, token, prioritize, platforms, retryCount + 1)
   }
 }
 
