@@ -10,11 +10,6 @@ export enum Platform {
   MAC = 'mac'
 }
 
-const abServers = [
-  'https://asset-bundle-converter.decentraland.org',
-  'https://asset-bundle-converter-windows.decentraland.org',
-  'https://asset-bundle-converter-mac.decentraland.org'
-]
 export async function queueConversions(
   customABConverterServer: string,
   entity: DeploymentToSqs,

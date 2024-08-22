@@ -25,6 +25,7 @@ export default async () => {
   const shouldPrioritize = !!args['--prioritize']
 
   assert(!!token, '--token is missing')
+  platforms.forEach((platform) => assert(Object.values(Platform).includes(platform), `Invalid platform: ${platform}`))
 
   console.log(`>                 Parameters:`)
   console.log(`                 Platform(s): ${platforms.join(',')}`)
@@ -59,7 +60,7 @@ export default async () => {
       shouldPrioritize,
       platforms
     )
-    console.log(`  Result:`, JSON.stringify(result, undefined, 2))
+    console.log(`  Result:`, JSON.stringify(result))
   }
 
   console.log(`Finished!`)

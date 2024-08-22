@@ -25,6 +25,7 @@ export default async () => {
 
   assert(!!token, '--token is missing')
   assert(pointers.length > 0 || cids.length > 0, '--pointer or --cid are required')
+  platforms.forEach((platform) => assert(Object.values(Platform).includes(platform), `Invalid platform: ${platform}`))
 
   console.log(`>                 Parameters:`)
   pointers.length && console.log(`                    Pointers: ${pointers.join(',')}`)
@@ -71,7 +72,7 @@ export default async () => {
       shouldPrioritize,
       platforms
     )
-    console.log(`  Result:`, JSON.stringify(result, undefined, 2))
+    console.log(`  Result:`, JSON.stringify(result))
   }
 
   console.log(`Finished!`)
