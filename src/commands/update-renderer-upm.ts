@@ -3,7 +3,6 @@ import { assert } from "../helpers/assert"
 import simpleGit, { SimpleGit } from "simple-git"
 import { CliError } from "../bin"
 import { changeJSONFile, getUPMRendererPath, manifestPath, packagesLockPath, validDesktopLocation } from "../helpers/parse-utils"
-import * as fs from "fs"
 
 const git: SimpleGit = simpleGit(process.cwd(), { binary: "git" })
 

@@ -1,7 +1,7 @@
 import arg from "arg"
 import { ago } from "../helpers/ago"
 import { assert } from "../helpers/assert"
-import { daoCatalysts, fetchEntityByPointer, fetchWearablesByAddress } from "../helpers/catalysts"
+import { daoCatalysts, fetchEntityByPointer } from "../helpers/catalysts"
 
 export default async function () {
   const args = arg({
