@@ -28,7 +28,7 @@ export default async () => {
   const shouldPrioritize = !!args["--prioritize"]
 
 
-      
+
 
   assert(!!snapshot, "--snapshot is missing")
   assert(!!token, "--token is missing")
@@ -69,11 +69,11 @@ export default async () => {
   {
     const value = snapshotsJson[i]
     const toTime = value.timeRange.endTimestamp
-    
+
     if (toTime >= startDate)
     {
       snapshotEntitiesToProcess.push(value)
-    } 
+    }
   }
 
   const snapshotsCount = snapshotEntitiesToProcess.length;
@@ -85,7 +85,6 @@ export default async () => {
   let argStartPosition = args['--start-position']
   let argGrep = args['--grep']
   let shouldSkipUntilStartPosition = argStartPosition || false
-  let lastEntity = ""
 
   for (let i = 0; i < snapshotsCount; i++)
   {
@@ -93,7 +92,7 @@ export default async () => {
     const numberOfEntities = snapshotEntitiesToProcess[i].numberOfEntities
     console.log(`> (${i+1}/${snapshotsCount}) Fetching file ${hash} with ${numberOfEntities} entities`)
     const snapshotUrl = `${contentUrl}/contents/${hash}`
-    
+
     await processSnapshot(snapshotUrl, async (line, index) => {
       const percent = (100 * (index / numberOfEntities)).toFixed(2)
       try {
@@ -106,7 +105,7 @@ export default async () => {
           if (entity.entityId == argStartPosition)
           {
             shouldSkipUntilStartPosition = false
-          } else 
+          } else
           {
             return;
           }
@@ -115,7 +114,7 @@ export default async () => {
         if (startDate <= entity.entityTimestamp && entity.entityType == snapshot) {
 
           await tryRetryQueueConversion(abServer, entity.entityId, contentUrl, token, shouldPrioritize)
-          
+
           console.log(`  (${i+1}/${snapshotsCount}) [${percent}%]`, entity.entityId, entity.pointers[0])
         }
       } catch (error) {
@@ -123,7 +122,7 @@ export default async () => {
       }
     })
   }
-  
+
   console.log(`Finished!`)
 }
 
@@ -131,27 +130,27 @@ const processWorlds = async (abServer : string, token:string, prioritize: boolea
     console.log("Processing worlds.");
     const worldsIndexUrl = 'https://worlds-content-server.decentraland.org/index'
     const worldsContentUrl = 'https://worlds-content-server.decentraland.org/'
-  
+
     const worldsReq = await fetch(worldsIndexUrl)
     if (!worldsReq.ok) throw new CliError(`Invalid response from ${worldsIndexUrl}`)
     const worldsJson = await worldsReq.json() as any
     if (!worldsJson.data) throw new CliError(`Json has invalid format`)
     const worlds = worldsJson.data as Array<any>
     const worldsCount = worlds.length
-  
+
       for (let i = 0; i < worldsCount; i++)
       {
           const percent = (100 * (i / worldsCount)).toFixed(2)
           const world = worlds[i]
           const name = world.name
           const scenes = world.scenes as Array<any>
-  
+
           for (let j = 0; j < scenes.length; j++)
           {
             const scene = scenes[j]
-            
+
             console.log(`> [${percent}%]`, name, scene.id)
-    
+
             await tryRetryQueueConversion(abServer, scene.id, worldsContentUrl, token, prioritize)
           }
       }
@@ -167,7 +166,6 @@ const processWorlds = async (abServer : string, token:string, prioritize: boolea
     const worldsJson = await worldsReq.json() as any
     if (!worldsJson.data) throw new CliError(`Json has invalid format`)
     const worlds = worldsJson.data as Array<any>
-    const worldsCount = worlds.length
 
     if(worldName)
     {
@@ -216,7 +214,7 @@ const tryRetryQueueConversion = async(abServer:string, entityId:string, contentU
   {
     console.log(`> Unexpected error, retrying in 5 seconds...`)
     await new Promise(f => setTimeout(f, 5000));
-    tryRetryQueueConversion(abServer, entityId, contentUrl, token, prioritize, retryCount+1);
+    await tryRetryQueueConversion(abServer, entityId, contentUrl, token, prioritize, retryCount+1);
   }
 }
 
@@ -226,16 +224,18 @@ const processSnapshot = async (url:any, processLine: (line:string, index:number)
     console.error(`Failed downloading snapshot with url: ${url} after 3 retries.`);
     return;
   }
-  
+
   const decoder = new StringDecoder('utf8');
   let remaining = '';
   let index = 0
   try {
     const response = await fetch(url);
-    if (!response.ok) throw new CliError(`Invalid response from ${url}`)
+    if (!response.ok) {
+      throw new CliError(`Invalid response from ${url}`)
+    }
 
-    
-    for await (const data of response.body) {
+
+    for await (const data of response.body ?? []) {
       const chunk = decoder.write(data);
       const lines = (remaining + chunk).split('\n');
 

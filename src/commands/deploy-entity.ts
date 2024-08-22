@@ -1,6 +1,6 @@
 import { readFile } from "fs/promises"
 import EthCrypto from "eth-crypto"
-import { DeploymentBuilder, DeploymentPreparationData, ContentClient } from "dcl-catalyst-client"
+import { DeploymentBuilder, createContentClient } from "dcl-catalyst-client"
 import { Authenticator } from "@dcl/crypto"
 import { hexToBytes } from "eth-connect"
 import { ethSign, recoverAddressFromEthSignature } from "@dcl/crypto/dist/crypto"
@@ -10,6 +10,8 @@ import { CliError } from "../bin"
 import arg from "arg"
 import { assert } from "console"
 import { recurseFolder } from "../helpers/recurse-folder"
+import { createFetchComponent } from "@well-known-components/fetch-component";
+import { DeploymentPreparationData } from "dcl-catalyst-client/dist/client";
 
 export default async () => {
   const args = arg({
@@ -37,7 +39,8 @@ export default async () => {
   const contentUrl = (args["--content-server"] || "https://peer.decentraland.org/content").replace(/\/$/, "")
   console.log(`              Content server: ${contentUrl}`)
 
-  const client = new ContentClient({ contentUrl })
+  const fetch = createFetchComponent()
+  const client = createContentClient({ url: contentUrl, fetcher: fetch })
 
   const files: Map<string, Uint8Array> = new Map()
 
@@ -77,7 +80,7 @@ export default async () => {
   const sig = ethSign(hexToBytes(privateKey!), "test")
   const address = recoverAddressFromEthSignature(sig, "test")
   console.log(`              Signer address: ${address}`)
-  
+
   const messageHash = Authenticator.createEthereumMessageHash(deploymentEntity.entityId)
   const signature = EthCrypto.sign(privateKey!, Buffer.from(messageHash).toString("hex"))
   const authChain = Authenticator.createSimpleAuthChain(deploymentEntity.entityId, address, signature)
