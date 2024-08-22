@@ -36,7 +36,7 @@
     "@dcl/crypto": "^3.2.4",
     "@dcl/schemas": "^8.2.1-20230713143922.commit-b923191",
     "arg": "^5.0.2",
-    "dcl-catalyst-client": "^14.0.6",
+    "dcl-catalyst-client": "^21.7.0",
     "eth-crypto": "^2.5.0",
     "simple-git": "^3.14.0",
     "undici": "^5.15.0"
