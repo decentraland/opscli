@@ -1,9 +1,9 @@
-import { SnapshotSyncDeployment } from "@dcl/schemas"
-import arg from "arg"
-import { fetch } from "undici"
-import { CliError } from "../bin"
-import { assert } from "../helpers/assert"
-import { createFileWriter } from "../helpers/fileWriter"
+import { SnapshotSyncDeployment } from '@dcl/schemas'
+import arg from 'arg'
+import { fetch } from 'undici'
+import { CliError } from '../bin'
+import { assert } from '../helpers/assert'
+import { createFileWriter } from '../helpers/fileWriter'
 
 async function* streamEntitiesFromSnapshot(contentUrl: string, snapshotHash: string) {
   console.log(`fetching: ${contentUrl}/contents/${snapshotHash}`)
@@ -14,7 +14,7 @@ async function* streamEntitiesFromSnapshot(contentUrl: string, snapshotHash: str
   console.log(`  File length ${(len / 1024 / 1024).toFixed(1)}MB`)
   let currentCursor = 0
   let nextCursor = 0
-  while ((nextCursor = jsonNd.indexOf('\n', currentCursor + 1)) != -1) {
+  while ((nextCursor = jsonNd.indexOf('\n', currentCursor + 1)) !== -1) {
     const line = jsonNd.substring(currentCursor, nextCursor)
     currentCursor = nextCursor
     if (line.trim().startsWith('{')) {
@@ -27,21 +27,21 @@ const ALL_TYPES_ARG = 'all-types'
 
 export default async () => {
   const args = arg({
-    "--entity-type": String,
-    "--content-server": String,
-    "--output-file": String,
+    '--entity-type': String,
+    '--content-server': String,
+    '--output-file': String
   })
 
-  const entityType = args["--entity-type"]
+  const entityType = args['--entity-type']
 
-  assert(!!entityType, "--entity-type is missing")
+  assert(!!entityType, '--entity-type is missing')
 
-  const outputFile = args["--output-file"]
+  const outputFile = args['--output-file']
 
-  assert(!!outputFile, "--output-file is missing")
+  assert(!!outputFile, '--output-file is missing')
 
   console.log(`>                 Parameters:`)
-  const contentUrl = (args["--content-server"] || "https://peer.decentraland.zone/content").replace(/\/$/, "")
+  const contentUrl = (args['--content-server'] || 'https://peer.decentraland.zone/content').replace(/\/$/, '')
   console.log(`                 Entity type: ${entityType}`)
   console.log(`              Content server: ${contentUrl}`)
 
@@ -49,7 +49,7 @@ export default async () => {
   const snapshotsReq = await fetch(`${contentUrl}/snapshots`)
   if (!snapshotsReq.ok) throw new CliError(`Invalid snapshot response from ${contentUrl}/snapshot`)
 
-  const snapshotsJson = await snapshotsReq.json() as any
+  const snapshotsJson = (await snapshotsReq.json()) as any
   for (const snapshot of snapshotsJson) {
     if (!('hash' in snapshot)) {
       throw new CliError(`Invalid snapshot ${snapshot}`)
@@ -59,12 +59,12 @@ export default async () => {
   const snapshotHashes = snapshotsJson.map((s: any) => s.hash)
   console.log(snapshotHashes)
   const newSnapshotFile = await createFileWriter(outputFile || '')
-  newSnapshotFile.appendDebounced('### Decentraland json snapshot\n')
+  await newSnapshotFile.appendDebounced('### Decentraland json snapshot\n')
   for (const snapshotHash of snapshotHashes) {
     for await (const snapshotElem of streamEntitiesFromSnapshot(contentUrl, snapshotHash)) {
       const entity: SnapshotSyncDeployment = JSON.parse(snapshotElem)
       if (entityType === ALL_TYPES_ARG || entity.entityType === entityType) {
-        newSnapshotFile.appendDebounced(JSON.stringify(entity) + '\n')
+        await newSnapshotFile.appendDebounced(JSON.stringify(entity) + '\n')
       }
     }
   }
