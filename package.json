@@ -39,7 +39,7 @@
     "dcl-catalyst-client": "^14.0.6",
     "eth-crypto": "^2.5.0",
     "simple-git": "^3.14.0",
-    "undici": "^5.15.0"
+    "undici": "^6.19.8"
   },
   "files": [
     "dist"
