@@ -36,7 +36,7 @@ jobs:
         run:  make build
 
       - name: lint check
-        run:  npm lint:check
+        run:  npm run lint:check
 
       - name: test
         run:  make test
