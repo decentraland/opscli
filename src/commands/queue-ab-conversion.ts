@@ -1,7 +1,7 @@
 import { AuthLinkType, IPFSv1, IPFSv2 } from '@dcl/schemas'
 import arg from 'arg'
 import { assert } from '../helpers/assert'
-import { defaultAbAdmin, Platform, queueConversions } from '../helpers/asset-bundles'
+import { productionAbAdmin, Platform, queueConversions } from '../helpers/asset-bundles'
 import { getActiveEntities } from '../helpers/downloads'
 
 export default async () => {
@@ -18,7 +18,7 @@ export default async () => {
   const pointers = args['--pointer'] || []
   const cids = args['--cid'] || []
   const token = args['--token']!
-  const abServer = args['--ab-server'] || defaultAbAdmin
+  const abServer = args['--ab-server'] || productionAbAdmin
   const platforms = (args['--platform'] as Platform[]) || Object.values(Platform)
   const contentUrl = (args['--content-server'] || 'https://peer.decentraland.org/content').replace(/\/$/, '')
   const shouldPrioritize = !!args['--prioritize']

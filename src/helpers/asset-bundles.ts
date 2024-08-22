@@ -2,7 +2,7 @@ import { DeploymentToSqs } from '@dcl/schemas/dist/misc/deployments-to-sqs'
 import { fetch } from 'undici'
 import { CliError } from '../bin'
 
-export const defaultAbAdmin = 'https://ab-admin.decentraland.org'
+export const productionAbAdmin = 'https://ab-admin.decentraland.org'
 
 export enum Platform {
   WEBGL = 'webgl',

@@ -3,7 +3,7 @@ import arg from 'arg'
 import { fetch } from 'undici'
 import { CliError } from '../bin'
 import { assert } from '../helpers/assert'
-import { defaultAbAdmin, Platform, queueConversions } from '../helpers/asset-bundles'
+import { productionAbAdmin, Platform, queueConversions } from '../helpers/asset-bundles'
 import { StringDecoder } from 'string_decoder'
 import { exit } from 'process'
 
@@ -25,7 +25,7 @@ export default async () => {
 
   const snapshot = args['--snapshot'] || 'wearable'
   const token = args['--token']!
-  const abServer = args['--ab-server'] || defaultAbAdmin
+  const abServer = args['--ab-server'] || productionAbAdmin
   const platforms = (args['--platform'] as Platform[]) || Object.values(Platform)
   const shouldPrioritize = !!args['--prioritize']
 
