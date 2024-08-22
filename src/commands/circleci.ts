@@ -1,5 +1,4 @@
 import arg from "arg"
-import fs from "fs/promises"
 import { fetch } from "undici"
 import { assert } from "../helpers/assert"
 import { tldFromEnv } from "../helpers/env-domains"
