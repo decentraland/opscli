@@ -1,14 +1,14 @@
-import arg from "arg"
-import { ago } from "../helpers/ago"
-import { assert } from "../helpers/assert"
-import { daoCatalysts, fetchEntityByPointer } from "../helpers/catalysts"
+import arg from 'arg'
+import { ago } from '../helpers/ago'
+import { assert } from '../helpers/assert'
+import { daoCatalysts, fetchEntityByPointer } from '../helpers/catalysts'
 
 export default async function () {
   const args = arg({
-    "--pointer": String,
+    '--pointer': String
   })
 
-  let pointer = assert(args["--pointer"], "--pointer is missing")
+  let pointer = assert(args['--pointer'], '--pointer is missing')
 
   if (pointer.startsWith('\\')) {
     pointer = pointer.substring(1)
@@ -22,13 +22,13 @@ export default async function () {
   const timestamps: Date[] = []
   const entityIds = new Set<string>()
 
-  for (let { baseUrl } of catalysts) {
+  for (const { baseUrl } of catalysts) {
     try {
       const result = await fetchEntityByPointer(baseUrl, pointer)
       const date = new Date(result.deployments[0]?.localTimestamp)
       console.log(
-        "  " +
-          result.baseUrl.padEnd(45, " ") +
+        '  ' +
+          result.baseUrl.padEnd(45, ' ') +
           date.toISOString() +
           ` (${ago(date)}) ` +
           result.deployments[0]?.entityId
@@ -36,7 +36,7 @@ export default async function () {
       timestamps.push(date)
       entityIds.add(result.deployments[0]?.entityId)
     } catch (err: any) {
-      console.log("  " + baseUrl.padEnd(45, " ") + err.message)
+      console.log('  ' + baseUrl.padEnd(45, ' ') + err.message)
     }
   }
 
@@ -46,8 +46,8 @@ export default async function () {
   const maxDate = timestamps[timestamps.length - 1]
 
   console.log(
-    `> PropagationTime: ${Math.floor((maxDate.getTime() - minDate.getTime()) / 1000)} seconds  `.padEnd(47, " ") +
+    `> PropagationTime: ${Math.floor((maxDate.getTime() - minDate.getTime()) / 1000)} seconds  `.padEnd(47, ' ') +
       `${minDate.toISOString()} -> ${maxDate.toISOString()}`
   )
-  console.log(`> Convergent: ${entityIds.size == 1 ? "✅" : "❌"}`)
+  console.log(`> Convergent: ${entityIds.size === 1 ? '✅' : '❌'}`)
 }

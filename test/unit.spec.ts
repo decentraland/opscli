@@ -1,3 +1,3 @@
-describe("unit", () => {
-  it("smoke test", () => {})
+describe('unit', () => {
+  it('smoke test', () => {})
 })
