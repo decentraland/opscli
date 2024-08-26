@@ -1,22 +1,37 @@
 #!/usr/bin/env node
 
+import queryRollout from './commands/query-rollout'
+import wearablesConsistency from './commands/wearables-consistency'
+import pointerConsistency from './commands/pointer-consistency'
+import updateRendererUpm from './commands/update-renderer-upm'
+import secretManager from './commands/secret-manager'
+import parametersManager from './commands/parameters-manager'
+import downloadEntity from './commands/download-entity'
+import deployEntity from './commands/deploy-entity'
+import queueAbConversion from './commands/queue-ab-conversion'
+import queueAbConversionSnapshot from './commands/queue-ab-conversion-snapshot'
+import queueAbConversionAbout from './commands/queue-ab-conversion-about'
+import checkAbConversion from './commands/check-ab-conversion'
+import circleci from './commands/circleci'
+import concatSnapshots from './commands/concat-snapshots'
+
 export class CliError extends Error {}
 
 const commands = {
-  'query-rollout': './commands/query-rollout',
-  'wearables-consistency': './commands/wearables-consistency',
-  'pointer-consistency': './commands/pointer-consistency',
-  'update-renderer-upm': './commands/update-renderer-upm',
-  'secret-manager': './commands/secret-manager',
-  'parameters-manager': './commands/parameters-manager',
-  'download-entity': './commands/download-entity',
-  'deploy-entity': './commands/deploy-entity',
-  'queue-ab-conversion': './commands/queue-ab-conversion',
-  'check-ab-conversion': './commands/check-ab-conversion',
-  'queue-ab-conversion-snapshot': './commands/queue-ab-conversion-snapshot',
-  'queue-ab-conversion-about': './commands/queue-ab-conversion-about',
-  circleci: './commands/circleci',
-  'concat-snapshots': './commands/concat-snapshots'
+  'query-rollout': queryRollout,
+  'wearables-consistency': wearablesConsistency,
+  'pointer-consistency': pointerConsistency,
+  'update-renderer-upm': updateRendererUpm,
+  'secret-manager': secretManager,
+  'parameters-manager': parametersManager,
+  'download-entity': downloadEntity,
+  'deploy-entity': deployEntity,
+  'queue-ab-conversion': queueAbConversion,
+  'queue-ab-conversion-snapshot': queueAbConversionSnapshot,
+  'queue-ab-conversion-about': queueAbConversionAbout,
+  'check-ab-conversion': checkAbConversion,
+  circleci: circleci,
+  'concat-snapshots': concatSnapshots
 }
 
 async function main() {
@@ -31,8 +46,7 @@ async function main() {
     )
   }
 
-  const { default: fn } = await import(commands[commandName])
-  await fn()
+  await commands[commandName]()
 }
 
 main().catch((err) => {

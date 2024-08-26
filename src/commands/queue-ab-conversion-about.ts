@@ -1,7 +1,7 @@
 import { AuthLinkType } from '@dcl/schemas'
 import arg from 'arg'
 import { assert } from '../helpers/assert'
-import { multiPlatformFlag, queueConversions } from '../helpers/asset-bundles'
+import { productionAbAdmin, Platform, queueConversions } from '../helpers/asset-bundles'
 import { fetch } from 'undici'
 import { CliError } from '../bin'
 import { parseEntityUrn } from '../helpers/parseEntityUrn'
@@ -10,6 +10,7 @@ export default async () => {
   const args = arg({
     '--about-url': String,
     '--ab-server': String,
+    '--platform': [String],
     '--token': String,
     '--force': Boolean,
     '--prioritize': Boolean
@@ -17,14 +18,17 @@ export default async () => {
 
   const aboutUrl = args['--about-url']!
   const token = args['--token']!
-  const abServer = args['--ab-server'] || multiPlatformFlag
+  const abServer = args['--ab-server'] || productionAbAdmin
+  const platforms = (args['--platform'] as Platform[]) || Object.values(Platform)
   const force = args['--force'] || false
 
   const shouldPrioritize = !!args['--prioritize']
 
   assert(!!token, '--token is missing')
+  platforms.forEach((platform) => assert(Object.values(Platform).includes(platform), `Invalid platform: ${platform}`))
 
   console.log(`>                 Parameters:`)
+  console.log(`                 Platform(s): ${platforms.join(',')}`)
   console.log(`         Asset bundle server: ${abServer}`)
   console.log(`               Force rebuild: ${force}`)
 
@@ -53,9 +57,10 @@ export default async () => {
         force
       },
       token,
-      shouldPrioritize
+      shouldPrioritize,
+      platforms
     )
-    console.log(`  Result: ${JSON.stringify(result)}`)
+    console.log(`  Result:`, JSON.stringify(result))
   }
 
   console.log(`Finished!`)
