@@ -43,12 +43,20 @@
       margin: 10px auto;
       word-break: break-word;
     }
+
+    iframe {
+      border: none;
+    }
   </style>
 </head>
 
 <body>
   <div id="appContainer">
-    <h3>Enter Coordinates:</h3>
+    <h1>Check Asset Bundles</h1>
+    <h2>Queue Info</h2>
+    <iframe src="https://ab-admin.decentraland.org/status"></iframe>
+    </hr>
+    <h2>Enter Coordinates:</h2>
     <input type="text" id="coordinatesInput" placeholder="e.g. -12,34; 56,-78; 9,0">
     <button onclick="validateInput()">Check</button>
     <div id="coordinateContainer"></div>
@@ -171,6 +179,24 @@
       logP.textContent = message
       container.appendChild(logP)
     }
+
+    document.getElementById('dataIframe').onload = function () {
+      try {
+        const iframe = document.getElementById('dataIframe')
+        const iframeDocument = iframe.contentDocument || iframe.contentWindow.document
+        const preElement = iframeDocument.querySelector('pre')
+
+        if (preElement) {
+          const data = JSON.parse(preElement.textContent)
+          const queueStatus = data.queueStatus
+          document.getElementById('jsonContainer').innerHTML = '<pre>' + JSON.stringify(queueStatus, null, 2) + '</pre>'
+        } else {
+          console.error('No <pre> element found')
+        }
+      } catch (error) {
+        console.error('Error accessing iframe content:', error)
+      }
+    };
   </script>
 </body>
 
