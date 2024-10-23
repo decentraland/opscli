@@ -122,9 +122,9 @@
 
         for (const { entityId, pointers } of entityIdsToConvert) {
           appendLog(container, 'Pointers\n' + pointers.join(' ; '))
-          const result = await fetch(`${abServer}/manifest/${entityId}.json`, {cache: "no-store"})
-          const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json`, {cache: "no-store"})
-          const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json`, {cache: "no-store"})
+          const result = await fetch(`${abServer}/manifest/${entityId}.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
+          const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
+          const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
 
           appendLog(container, 'WEBGL')
           await check(entityId, pointers, result)
@@ -147,9 +147,9 @@
           const entity = await getWorldsActiveEntity(world, worldsServer)
           entityId = entity.configurations.scenesUrn[0].split(':')[3].split('?')[0]
           appendLog(container, 'World ' + world)
-          const result = await fetch(`${abServer}/manifest/${entityId}.json`, {cache: "no-store"})
-          const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json`, {cache: "no-store"})
-          const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json`, {cache: "no-store"})
+          const result = await fetch(`${abServer}/manifest/${entityId}.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
+          const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
+          const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
 
           appendLog(container, 'WEBGL')
           await check(entityId, [world], result)
@@ -213,7 +213,7 @@
     async function check(entityId, pointers, promise) {
       const container = document.getElementById('coordinateContainer')
       if (!promise.ok) {
-        const failManifest = await fetch(`${abServer}/manifest/${entityId}_failed.json`) // Mock URL for the example
+        const failManifest = await fetch(`${abServer}/manifest/${entityId}_failed.json?timestamp=${new Date().getTime()}`) // Mock URL for the example
         if (failManifest.ok) {
           const manifest = await failManifest.json()
           const logMessage = `🟠 ${entityId} (${pointers[0]}): Failed. Version=${manifest.version} ExitCode=${manifest.exitCode} Date=${manifest.date} Log=${manifest.log}`
