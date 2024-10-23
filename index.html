@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coordinate Checker</title>
+  <title>AB Checker</title>
   <style>
     body {
       display: flex;
@@ -23,7 +23,7 @@
       background-color: #f9f9f9;
     }
 
-    #coordinatesInput {
+    #userInput {
       width: 600px;
       margin-bottom: 10px;
       padding: 10px;
@@ -57,47 +57,54 @@
     <iframe src="https://ab-admin.decentraland.org/status"></iframe>
     </hr>
     <h2>Enter Coordinates:</h2>
-    <input type="text" id="coordinatesInput" placeholder="e.g. -12,34; 56,-78; 9,0">
+    <input type="text" id="userInput" placeholder="e.g. -12,34; 56,-78; 9,0 or nacho.dcl.eth">
     <button onclick="validateInput()">Check</button>
     <div id="coordinateContainer"></div>
-
   </div>
 
   <script>
     const abServer = 'https://ab-cdn.decentraland.org'
     const contentServer = 'https://peer.decentraland.org/content'
+    const worldsServer = 'https://worlds-content-server.decentraland.org/world/{world}/about'
 
     function validateInput() {
-      const input = document.getElementById('coordinatesInput').value
+      const input = document.getElementById('userInput').value
       // Split the input string by ';' to get individual coordinate pairs
-      const coordinatePairs = input.split(';').map(pair => pair.trim())
+      const values = input.split(';').map(pair => pair.trim())
 
       const validCoordinates = []
+      const validWorlds = []
       let isValid = true
 
       // Validate each coordinate pair
-      coordinatePairs.forEach(pair => {
-        const coordinates = pair.split(',').map(coord => coord.trim())
-        if (coordinates.length === 2) {
-          const [x, y] = coordinates
-          if (!isNaN(x) && !isNaN(y)) {
-            validCoordinates.push(`${parseFloat(x)},${parseFloat(y)}`)
+      values.forEach(value => {
+        if (value.indexOf('.eth') !== -1) {
+          // world
+          validWorlds.push(value)
+        } else {
+          // coordinate
+          const coordinates = value.split(',').map(coord => coord.trim())
+          if (coordinates.length === 2) {
+            const [x, y] = coordinates
+            if (!isNaN(x) && !isNaN(y)) {
+              validCoordinates.push(`${parseFloat(x)},${parseFloat(y)}`)
+            } else {
+              console.log(`Invalid coordinates: (${x}, ${y})`)
+              isValid = false
+            }
           } else {
-            console.log(`Invalid coordinates: (${x}, ${y})`)
+            console.log(`Invalid format: ${pair}`)
             isValid = false
           }
-        } else {
-          console.log(`Invalid format: ${pair}`)
-          isValid = false
         }
       })
 
       if (isValid) {
-        checkCoordinates(validCoordinates)
+        checkValues(validCoordinates, validWorlds)
       }
     }
 
-    async function checkCoordinates(coordinateArray) {
+    async function checkValues(coordinateArray, worldsArray) {
       const container = document.getElementById('coordinateContainer')
       container.innerHTML = ''
 
@@ -106,30 +113,58 @@
       loadingMessage.textContent = 'Loading...'
       container.appendChild(loadingMessage)
 
-      const entityIdsToConvert = []
-      for (const entity of await getActiveEntities(coordinateArray, contentServer)) {
-        entityIdsToConvert.push({ entityId: entity.id, pointers: entity.pointers })
+      let entityIdsToConvert = []
+      if (coordinateArray.length > 0) {
+        for (const entity of await getActiveEntities(coordinateArray, contentServer)) {
+          entityIdsToConvert.push({ entityId: entity.id, pointers: entity.pointers })
+        }
+
+        for (const { entityId, pointers } of entityIdsToConvert) {
+          appendLog(container, 'Pointers\n' + pointers.join(' ; '))
+          const result = await fetch(`${abServer}/manifest/${entityId}.json`)
+          const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json`)
+          const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json`)
+
+          appendLog(container, 'WEBGL')
+          await check(entityId, pointers, result)
+
+          appendLog(container, 'WINDOWS')
+          await check(entityId, pointers, resultWindows)
+
+          appendLog(container, 'MAC')
+          await check(entityId, pointers, resultMac)
+
+          appendLog(container, '')
+          appendLog(container, '-----------------------------------------------------------------------------------')
+          appendLog(container, '')
+        }
       }
-      console.log(entityIdsToConvert)
 
-      for (const { entityId, pointers } of entityIdsToConvert) {
-        appendLog(container, 'Pointers\n' + pointers.join(' ; '))
-        const result = await fetch(`${abServer}/manifest/${entityId}.json`)
-        const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json`)
-        const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json`)
+      entityIdsToConvert = []
+      for (const world of worldsArray) {
+        try {
+          const entity = await getWorldsActiveEntity(world, worldsServer)
+          entityId = entity.configurations.scenesUrn[0].split(':')[3].split('?')[0]
+          appendLog(container, 'World ' + world)
+          const result = await fetch(`${abServer}/manifest/${entityId}.json`)
+          const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json`)
+          const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json`)
 
-        appendLog(container, 'WEBGL')
-        await check(entityId, pointers, result)
+          appendLog(container, 'WEBGL')
+          await check(entityId, [world], result)
 
-        appendLog(container, 'WINDOWS')
-        await check(entityId, pointers, resultWindows)
+          appendLog(container, 'WINDOWS')
+          await check(entityId, [world], resultWindows)
 
-        appendLog(container, 'MAC')
-        await check(entityId, pointers, resultMac)
+          appendLog(container, 'MAC')
+          await check(entityId, [world], resultMac)
 
-        appendLog(container, '')
-        appendLog(container, '-----------------------------------------------------------------------------------')
-        appendLog(container, '')
+          appendLog(container, '')
+          appendLog(container, '-----------------------------------------------------------------------------------')
+          appendLog(container, '')
+        } catch (e) {
+          // do nothing
+        }
       }
 
       // Remove loading message
@@ -154,6 +189,24 @@
       return JSON.parse(response)
     }
 
+    async function getWorldsActiveEntity(world, sourceServer) {
+      const res = await fetch(sourceServer.replace('{world}', world), {
+        method: 'get',
+        headers: { 'content-type': 'application/json' }
+      })
+
+      const response = await res.text()
+
+      if (!res.ok) {
+        const container = document.getElementById('coordinateContainer')
+        appendLog(container, 'World ' + world)
+        appendLog(container, response)
+        throw new Error('Error fetching list of active entities: ' + response)
+      }
+
+      return JSON.parse(response)
+    }
+
     async function check(entityId, pointers, promise) {
       const container = document.getElementById('coordinateContainer')
       if (!promise.ok) {
@@ -168,8 +221,13 @@
         }
       } else {
         const manifest = await promise.json()
-        const logMessage = `🟢 ${entityId} (${pointers[0]}): Version=${manifest.version} ExitCode=${manifest.exitCode} Date=${manifest.date}`
-        appendLog(container, logMessage)
+        if (manifest.files.length > 0) {
+          const logMessage = `🟢 ${entityId} (${pointers[0]}): Version=${manifest.version} ExitCode=${manifest.exitCode} Date=${manifest.date}`
+          appendLog(container, logMessage)
+        } else {
+          const logMessage = `🔴 ${entityId} (${pointers[0]}): Passed without Files!`
+          appendLog(container, logMessage)
+        }
       }
     }
 
