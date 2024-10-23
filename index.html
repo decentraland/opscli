@@ -53,6 +53,7 @@
 <body>
   <div id="appContainer">
     <h1>Check Asset Bundles</h1>
+    <h3>It is recommended to open this page in incognito mode to avoid any cache issue</h3>
     <h2>Queue Info</h2>
     <iframe src="https://ab-admin.decentraland.org/status"></iframe>
     </hr>
@@ -121,9 +122,9 @@
 
         for (const { entityId, pointers } of entityIdsToConvert) {
           appendLog(container, 'Pointers\n' + pointers.join(' ; '))
-          const result = await fetch(`${abServer}/manifest/${entityId}.json`)
-          const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json`)
-          const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json`)
+          const result = await fetch(`${abServer}/manifest/${entityId}.json`, {cache: "no-store"})
+          const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json`, {cache: "no-store"})
+          const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json`, {cache: "no-store"})
 
           appendLog(container, 'WEBGL')
           await check(entityId, pointers, result)
@@ -146,9 +147,9 @@
           const entity = await getWorldsActiveEntity(world, worldsServer)
           entityId = entity.configurations.scenesUrn[0].split(':')[3].split('?')[0]
           appendLog(container, 'World ' + world)
-          const result = await fetch(`${abServer}/manifest/${entityId}.json`)
-          const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json`)
-          const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json`)
+          const result = await fetch(`${abServer}/manifest/${entityId}.json`, {cache: "no-store"})
+          const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json`, {cache: "no-store"})
+          const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json`, {cache: "no-store"})
 
           appendLog(container, 'WEBGL')
           await check(entityId, [world], result)
@@ -177,7 +178,8 @@
       const res = await fetch(url, {
         method: 'post',
         body: JSON.stringify({ pointers }),
-        headers: { 'content-type': 'application/json' }
+        headers: { 'content-type': 'application/json' },
+        cache: "no-store"
       })
 
       const response = await res.text()
@@ -192,7 +194,8 @@
     async function getWorldsActiveEntity(world, sourceServer) {
       const res = await fetch(sourceServer.replace('{world}', world), {
         method: 'get',
-        headers: { 'content-type': 'application/json' }
+        headers: { 'content-type': 'application/json' },
+        cache: 'no-store'
       })
 
       const response = await res.text()
