@@ -47,6 +47,17 @@
     iframe {
       border: none;
     }
+
+    .server-input {
+      width: 600px;
+      margin-bottom: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .queue-contaniner {
+      display: flex;
+    }
   </style>
 </head>
 
@@ -54,8 +65,31 @@
   <div id="appContainer">
     <h1>Check Asset Bundles</h1>
     <h3>It is recommended to open this page in incognito mode to avoid any cache issue</h3>
-    <h2>Queue Info</h2>
-    <iframe src="https://ab-admin.decentraland.org/status"></iframe>
+    <div>
+      <p>AB Server (Use https://ab-cdn.decentraland.zone for dev catalysts)</p>
+      <input type="text" id="abServer" placeholder="https://ab-cdn.decentraland.org"
+        value="https://ab-cdn.decentraland.org" class="server-input">
+    </div>
+    <div>
+      <p>Catalyst Server</p>
+      <input type="text" id="contentServer" placeholder="https://peer.decentraland.org"
+        value="https://peer.decentraland.org" class="server-input">
+    </div>
+    <div>
+      <p>World Server </p>
+      <input type=" text" id="worldServer" placeholder="https://worlds-content-server.decentraland.org"
+        value="https://worlds-content-server.decentraland.org" class="server-input">
+    </div>
+    <div class="queue-contaniner">
+      <div>
+        <h2>Prod Queue Info</h2>
+        <iframe src=" https://ab-admin.decentraland.org/status"></iframe>
+      </div>
+      <div>
+        <h2>Dev Queue Info</h2>
+        <iframe src="https://ab-admin.decentraland.zone/status"></iframe>
+      </div>
+    </div>
     </hr>
     <h2>Enter Coordinates:</h2>
     <input type="text" id="userInput" placeholder="e.g. -12,34; 56,-78; 9,0 or nacho.dcl.eth">
@@ -64,11 +98,17 @@
   </div>
 
   <script>
-    const abServer = 'https://ab-cdn.decentraland.org'
-    const contentServer = 'https://peer.decentraland.org/content'
-    const worldsServer = 'https://worlds-content-server.decentraland.org/world/{world}/about'
+    let abServer = 'https://ab-cdn.decentraland.org'
+    let contentServer = 'https://peer.decentraland.org/content'
+    let worldsServer = 'https://worlds-content-server.decentraland.org/world/{world}/about'
+
 
     function validateInput() {
+      abServer = document.getElementById('abServer').value
+      contentServer = document.getElementById('contentServer').value + '/content'
+      worldsServer = document.getElementById('worldServer').value + '/world/{world}/about'
+
+
       const input = document.getElementById('userInput').value
       // Split the input string by ';' to get individual coordinate pairs
       const values = input.split(';').map(pair => pair.trim())
