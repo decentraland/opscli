@@ -23,7 +23,7 @@ export default async () => {
   const platforms = (args['--platform'] as Platform[]) || Object.values(Platform)
   const contentUrl = (args['--content-server'] || 'https://peer.decentraland.org/content').replace(/\/$/, '')
   const shouldPrioritize = !!args['--prioritize']
-  const animation = args['--animation'] || 'mecanim'
+  const animation = args['--animation'] || 'legacy'
 
   assert(!!token, '--token is missing')
   assert(pointers.length > 0 || cids.length > 0, '--pointer or --cid are required')
