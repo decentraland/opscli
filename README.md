@@ -17,7 +17,7 @@ npx @dcl/opscli pointer-consistency --pointer "0,0"
 ```
 npx @dcl/opscli queue-ab-conversion \
   --pointer "0,0" \
-  --pointer "110,10" \
+  --pointer="110,10" \
   --cid "110,10" \
   --token <ACCESS_TOKEN> \
   [--platform webgl] \
