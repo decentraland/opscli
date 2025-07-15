@@ -28,10 +28,10 @@ async function checkAssetBundleAvailability(entityId: string): Promise<void> {
 
 export default async function () {
   const args = arg({
-    "--pointer": String,
+    '--pointer': String
   })
 
-  let pointer = assert(args["--pointer"], "--pointer is missing")
+  let pointer = assert(args['--pointer'], '--pointer is missing')
 
   if (pointer.startsWith('\\')) {
     pointer = pointer.substring(1)
@@ -46,15 +46,15 @@ export default async function () {
   const entityIds = new Set<string>()
   const deployments: Array<{ timestamp: Date; entityId: string }> = []
 
-  for (let { baseUrl } of catalysts) {
+  for (const { baseUrl } of catalysts) {
     try {
       const result = await fetchEntityByPointer(baseUrl, pointer)
       const date = new Date(result.deployments[0]?.localTimestamp)
       const entityId = result.deployments[0]?.entityId
       
       console.log(
-        "  " +
-          result.baseUrl.padEnd(45, " ") +
+        '  ' +
+          result.baseUrl.padEnd(45, ' ') +
           date.toISOString() +
           ` (${ago(date)}) ` +
           entityId
@@ -64,7 +64,7 @@ export default async function () {
       entityIds.add(entityId)
       deployments.push({ timestamp: date, entityId })
     } catch (err: any) {
-      console.log("  " + baseUrl.padEnd(45, " ") + err.message)
+      console.log('  ' + baseUrl.padEnd(45, ' ') + err.message)
     }
   }
 
@@ -74,11 +74,11 @@ export default async function () {
   const maxDate = timestamps[timestamps.length - 1]
 
   console.log(
-    `> PropagationTime: ${Math.floor((maxDate.getTime() - minDate.getTime()) / 1000)} seconds  `.padEnd(47, " ") +
+    `> PropagationTime: ${Math.floor((maxDate.getTime() - minDate.getTime()) / 1000)} seconds  `.padEnd(47, ' ') +
       `${minDate.toISOString()} -> ${maxDate.toISOString()}`
   )
-  console.log(`> Convergent: ${entityIds.size == 1 ? "✅" : "❌"}`)
-
+  console.log(`> Convergent: ${entityIds.size === 1 ? '✅' : '❌'}`)
+  
   // Check asset bundle availability for the most recent deployment
   if (deployments.length > 0) {
     // Find the most recent deployment
@@ -89,4 +89,5 @@ export default async function () {
     console.log(`> Most recent deployment entity ID: ${mostRecent.entityId}`)
     await checkAssetBundleAvailability(mostRecent.entityId)
   }
+
 }

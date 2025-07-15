@@ -1,4 +1,4 @@
-import { fetch } from "undici"
+import { fetch } from 'undici'
 
 export type DAOCatalyst = {
   baseUrl: string
@@ -7,8 +7,8 @@ export type DAOCatalyst = {
 }
 
 export async function daoCatalysts(): Promise<Array<DAOCatalyst>> {
-  console.log("> Fetching DAO catalysts")
-  return (await fetch("https://peer.decentraland.org/lambdas/contracts/servers").then(($) => $.json())) as any
+  console.log('> Fetching DAO catalysts')
+  return (await fetch('https://peer.decentraland.org/lambdas/contracts/servers').then(($) => $.json())) as any
 }
 
 export async function fetchWearablesByAddress(baseUrl: string, address: string) {
@@ -16,7 +16,7 @@ export async function fetchWearablesByAddress(baseUrl: string, address: string) 
     baseUrl,
     wearables: (await fetch(`${baseUrl}/lambdas/collections/wearables-by-owner/${address}`).then(($) =>
       $.json()
-    )) as Array<{ urn: string; amount: number }>,
+    )) as Array<{ urn: string; amount: number }>
   }
 }
 
@@ -36,6 +36,6 @@ export async function fetchEntityByPointer(baseUrl: string, pointer: string) {
       metadata: unknown
       pointers: string[]
       content: { key: string; hash: string }[]
-    }>,
+    }>
   }
 }

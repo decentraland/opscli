@@ -17,14 +17,55 @@ npx @dcl/opscli pointer-consistency --pointer "0,0"
 ```
 npx @dcl/opscli queue-ab-conversion \
   --pointer "0,0" \
-  --pointer "110,10" \
+  --pointer="110,10" \
   --cid "110,10" \
   --token <ACCESS_TOKEN> \
-  [--ab-server https://asset-bundle-converter.decentraland.org] \
+  [--platform webgl] \
+  [--platform mac] \
+  [--platform windows] \
+  [--ab-server https://ab-admin.decentraland.org] \
   [--content-server https://peer.decentraland.org/content]
 ```
+> If no platform is specified, it runs for all platforms. Also, more than one can be specified at a time.
 
-### Check status of conversion
+> For dev, use `--ab-server https://ab-admin.decentraland.zone`.
+
+### Schedule asset bundle conversion of all worlds
+```
+npx @dcl/opscli queue-ab-conversion-snapshot \
+  --snapshot worlds \
+  [--platform webgl] \
+  [--platform mac] \
+  [--platform windows] \
+  --token <ACCESS_TOKEN> \
+  [--ab-server https://ab-admin.decentraland.org]
+```
+
+### Schedule asset bundle conversion of a specific world by name
+```
+npx @dcl/opscli queue-ab-conversion-snapshot \
+  --snapshot worlds \
+  [--platform webgl] \
+  [--platform mac] \
+  [--platform windows] \
+  --token <ACCESS_TOKEN> \
+  [--ab-server https://ab-admin.decentraland.org]
+  [--world-name <world-name.dcl.eth>]
+```
+
+### Schedule asset bundle conversion from custom about
+
+```
+npx @dcl/opscli queue-ab-conversion-about \
+  --token <ACCESS_TOKEN> \
+  [--platform webgl] \
+  [--platform mac] \
+  [--platform windows] \
+  --about-url https://sdk-team-cdn.decentraland.org/ipfs/goerli-plaza-main/about \
+  [--ab-server https://ab-admin.decentraland.org]
+```
+
+### Check the status of conversion
 
 ```
 npx @dcl/opscli check-ab-conversion \

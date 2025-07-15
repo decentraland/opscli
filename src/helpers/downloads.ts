@@ -1,8 +1,8 @@
-import { fetch } from "undici"
-import { dirname, resolve } from "path"
-import { mkdir, writeFile } from "fs/promises"
-import { existsSync } from "fs"
-import { Entity } from "@dcl/schemas"
+import { fetch } from 'undici'
+import { dirname, resolve } from 'path'
+import { mkdir, writeFile } from 'fs/promises'
+import { existsSync } from 'fs'
+import { Entity } from '@dcl/schemas'
 
 export async function downloadEntity(entity: Entity, server: string, destFolder: string) {
   await mkdir(destFolder, { recursive: true })
@@ -19,7 +19,7 @@ export async function downloadEntity(entity: Entity, server: string, destFolder:
 }
 
 export const downloadFile = async function (server: string, cid: string, filepath: string) {
-  const data = await (await fetch(server + "/contents/" + cid)).arrayBuffer()
+  const data = await (await fetch(server + '/contents/' + cid)).arrayBuffer()
 
   await mkdir(dirname(filepath), { recursive: true })
 
@@ -29,15 +29,15 @@ export const downloadFile = async function (server: string, cid: string, filepat
 export async function getActiveEntities(pointers: string[], sourceServer: string): Promise<Entity[]> {
   const url = `${sourceServer}/entities/active`
   const res = await fetch(url, {
-    method: "post",
+    method: 'post',
     body: JSON.stringify({ pointers }),
-    headers: { "content-type": "application/json" },
+    headers: { 'content-type': 'application/json' }
   })
 
   const response = await res.text()
 
   if (!res.ok) {
-    throw new Error("Error fetching list of active entities: " + response)
+    throw new Error('Error fetching list of active entities: ' + response)
   }
 
   return JSON.parse(response)
@@ -46,6 +46,6 @@ export async function getActiveEntities(pointers: string[], sourceServer: string
 export async function downloadEntityAndMetadata(entity: Entity, server: string, destFolder: string) {
   await downloadEntity(entity, server, destFolder)
 
-  await writeFile(resolve(destFolder, ".metadata"), JSON.stringify(entity.metadata, null, 2))
-  console.log("> Entity downloaded to " + destFolder)
+  await writeFile(resolve(destFolder, '.metadata'), JSON.stringify(entity.metadata, null, 2))
+  console.log('> Entity downloaded to ' + destFolder)
 }

@@ -1,21 +1,21 @@
-import arg from "arg"
-import path, { join, resolve } from "path"
-import { assert } from "../helpers/assert"
-import { downloadEntityAndMetadata, getActiveEntities } from "../helpers/downloads"
+import arg from 'arg'
+import path, { join, resolve } from 'path'
+import { assert } from '../helpers/assert'
+import { downloadEntityAndMetadata, getActiveEntities } from '../helpers/downloads'
 
 export default async () => {
   const args = arg({
-    "--pointer": [String],
-    "--content-server": String,
-    "--out": String,
+    '--pointer': [String],
+    '--content-server': String,
+    '--out': String
   })
 
-  const pointers = args["--pointer"]!
+  const pointers = args['--pointer']!
 
-  assert(pointers.length > 0, "--pointer is missing")
+  assert(pointers.length > 0, '--pointer is missing')
 
-  const server = (args["--content-server"] || "https://peer.decentraland.org/content").replace(/\/$/, "")
-  const out = args["--out"] || process.cwd()
+  const server = (args['--content-server'] || 'https://peer.decentraland.org/content').replace(/\/$/, '')
+  const out = args['--out'] || process.cwd()
 
   const entities = await getActiveEntities(pointers, server)
 

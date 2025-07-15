@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AB Checker</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      margin: 0;
+      overflow-y: auto;
+    }
+
+    #appContainer {
+      text-align: center;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+    }
+
+    #userInput {
+      width: 600px;
+      margin-bottom: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      max-width: 600px;
+      padding: 10px;
+      box-sizing: border-box;
+      margin-bottom: 20px;
+    }
+
+    p.log-entry {
+      width: 600px;
+      margin: 10px auto;
+      word-break: break-word;
+    }
+
+    iframe {
+      border: none;
+    }
+
+    .server-input {
+      width: 600px;
+      margin-bottom: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .queue-contaniner {
+      display: flex;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="appContainer">
+    <h1>Check Asset Bundles</h1>
+    <h3>It is recommended to open this page in incognito mode to avoid any cache issue</h3>
+    <div>
+      <p>AB Server (Use https://ab-cdn.decentraland.zone for dev catalysts)</p>
+      <input type="text" id="abServer" placeholder="https://ab-cdn.decentraland.org"
+        value="https://ab-cdn.decentraland.org" class="server-input">
+    </div>
+    <div>
+      <p>Catalyst Server</p>
+      <input type="text" id="contentServer" placeholder="https://peer.decentraland.org"
+        value="https://peer.decentraland.org" class="server-input">
+    </div>
+    <div>
+      <p>World Server </p>
+      <input type=" text" id="worldServer" placeholder="https://worlds-content-server.decentraland.org"
+        value="https://worlds-content-server.decentraland.org" class="server-input">
+    </div>
+    <div class="queue-contaniner">
+      <div>
+        <h2>Prod Queue Info</h2>
+        <iframe src=" https://ab-admin.decentraland.org/status"></iframe>
+      </div>
+      <div>
+        <h2>Dev Queue Info</h2>
+        <iframe src="https://ab-admin.decentraland.zone/status"></iframe>
+      </div>
+    </div>
+    </hr>
+    <h2>Enter Coordinates:</h2>
+    <input type="text" id="userInput" placeholder="e.g. -12,34; 56,-78; 9,0 or nacho.dcl.eth">
+    <button onclick="validateInput()">Check</button>
+    <div id="coordinateContainer"></div>
+  </div>
+
+  <script>
+    let abServer = 'https://ab-cdn.decentraland.org'
+    let contentServer = 'https://peer.decentraland.org/content'
+    let worldsServer = 'https://worlds-content-server.decentraland.org/world/{world}/about'
+
+
+    function validateInput() {
+      abServer = document.getElementById('abServer').value
+      contentServer = document.getElementById('contentServer').value + '/content'
+      worldsServer = document.getElementById('worldServer').value + '/world/{world}/about'
+
+
+      const input = document.getElementById('userInput').value
+      // Split the input string by ';' to get individual coordinate pairs
+      const values = input.split(';').map(pair => pair.trim())
+
+      const validCoordinates = []
+      const validWorlds = []
+      let isValid = true
+
+      // Validate each coordinate pair
+      values.forEach(value => {
+        if (value.indexOf('.eth') !== -1) {
+          // world
+          validWorlds.push(value)
+        } else {
+          // coordinate
+          const coordinates = value.split(',').map(coord => coord.trim())
+          if (coordinates.length === 2) {
+            const [x, y] = coordinates
+            if (!isNaN(x) && !isNaN(y)) {
+              validCoordinates.push(`${parseFloat(x)},${parseFloat(y)}`)
+            } else {
+              console.log(`Invalid coordinates: (${x}, ${y})`)
+              isValid = false
+            }
+          } else {
+            console.log(`Invalid format: ${pair}`)
+            isValid = false
+          }
+        }
+      })
+
+      if (isValid) {
+        checkValues(validCoordinates, validWorlds)
+      }
+    }
+
+    async function checkValues(coordinateArray, worldsArray) {
+      const container = document.getElementById('coordinateContainer')
+      container.innerHTML = ''
+
+      // Add loading message
+      const loadingMessage = document.createElement('p')
+      loadingMessage.textContent = 'Loading...'
+      container.appendChild(loadingMessage)
+
+      let entityIdsToConvert = []
+      if (coordinateArray.length > 0) {
+        for (const entity of await getActiveEntities(coordinateArray, contentServer)) {
+          entityIdsToConvert.push({ entityId: entity.id, pointers: entity.pointers })
+        }
+
+        for (const { entityId, pointers } of entityIdsToConvert) {
+          appendLog(container, 'Pointers\n' + pointers.join(' ; '))
+          const result = await fetch(`${abServer}/manifest/${entityId}.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
+          const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
+          const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
+
+          appendLog(container, 'WEBGL')
+          await check(entityId, pointers, result)
+
+          appendLog(container, 'WINDOWS')
+          await check(entityId, pointers, resultWindows)
+
+          appendLog(container, 'MAC')
+          await check(entityId, pointers, resultMac)
+
+          appendLog(container, '')
+          appendLog(container, '-----------------------------------------------------------------------------------')
+          appendLog(container, '')
+        }
+      }
+
+      entityIdsToConvert = []
+      for (const world of worldsArray) {
+        try {
+          const entity = await getWorldsActiveEntity(world, worldsServer)
+          entityId = entity.configurations.scenesUrn[0].split(':')[3].split('?')[0]
+          appendLog(container, 'World ' + world)
+          const result = await fetch(`${abServer}/manifest/${entityId}.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
+          const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
+          const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
+
+          appendLog(container, 'WEBGL')
+          await check(entityId, [world], result)
+
+          appendLog(container, 'WINDOWS')
+          await check(entityId, [world], resultWindows)
+
+          appendLog(container, 'MAC')
+          await check(entityId, [world], resultMac)
+
+          appendLog(container, '')
+          appendLog(container, '-----------------------------------------------------------------------------------')
+          appendLog(container, '')
+        } catch (e) {
+          // do nothing
+        }
+      }
+
+      // Remove loading message
+      container.removeChild(loadingMessage)
+      console.log(`Finished!`)
+    }
+
+    async function getActiveEntities(pointers, sourceServer) {
+      const url = `${sourceServer}/entities/active`
+      const res = await fetch(url, {
+        method: 'post',
+        body: JSON.stringify({ pointers }),
+        headers: { 'content-type': 'application/json' },
+        cache: "no-store"
+      })
+
+      const response = await res.text()
+
+      if (!res.ok) {
+        throw new Error('Error fetching list of active entities: ' + response)
+      }
+
+      return JSON.parse(response)
+    }
+
+    async function getWorldsActiveEntity(world, sourceServer) {
+      const res = await fetch(sourceServer.replace('{world}', world), {
+        method: 'get',
+        headers: { 'content-type': 'application/json' },
+        cache: 'no-store'
+      })
+
+      const response = await res.text()
+
+      if (!res.ok) {
+        const container = document.getElementById('coordinateContainer')
+        appendLog(container, 'World ' + world)
+        appendLog(container, response)
+        throw new Error('Error fetching list of active entities: ' + response)
+      }
+
+      return JSON.parse(response)
+    }
+
+    async function check(entityId, pointers, promise) {
+      const container = document.getElementById('coordinateContainer')
+      if (!promise.ok) {
+        const failManifest = await fetch(`${abServer}/manifest/${entityId}_failed.json?timestamp=${new Date().getTime()}`) // Mock URL for the example
+        if (failManifest.ok) {
+          const manifest = await failManifest.json()
+          const logMessage = `🟠 ${entityId} (${pointers[0]}): Failed. Version=${manifest.version} ExitCode=${manifest.exitCode} Date=${manifest.date} Log=${manifest.log}`
+          appendLog(container, logMessage)
+        } else {
+          const logMessage = `🔴 ${entityId} (${pointers[0]}): Not converted!`
+          appendLog(container, logMessage)
+        }
+      } else {
+        const manifest = await promise.json()
+        if (manifest.files.length > 0) {
+          const logMessage = `🟢 ${entityId} (${pointers[0]}): Version=${manifest.version} ExitCode=${manifest.exitCode} Date=${manifest.date}`
+          appendLog(container, logMessage)
+        } else {
+          const logMessage = `🔴 ${entityId} (${pointers[0]}): Passed without Files!`
+          appendLog(container, logMessage)
+        }
+      }
+    }
+
+    function appendLog(container, message) {
+      const logP = document.createElement('p')
+      logP.className = 'log-entry'
+      logP.textContent = message
+      container.appendChild(logP)
+    }
+
+    document.getElementById('dataIframe').onload = function () {
+      try {
+        const iframe = document.getElementById('dataIframe')
+        const iframeDocument = iframe.contentDocument || iframe.contentWindow.document
+        const preElement = iframeDocument.querySelector('pre')
+
+        if (preElement) {
+          const data = JSON.parse(preElement.textContent)
+          const queueStatus = data.queueStatus
+          document.getElementById('jsonContainer').innerHTML = '<pre>' + JSON.stringify(queueStatus, null, 2) + '</pre>'
+        } else {
+          console.error('No <pre> element found')
+        }
+      } catch (error) {
+        console.error('Error accessing iframe content:', error)
+      }
+    };
+  </script>
+</body>
+
+</html>

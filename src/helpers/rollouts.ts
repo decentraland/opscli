@@ -1,4 +1,4 @@
-import { fetch } from "undici"
+import { fetch } from 'undici'
 
 type Rollout = {
   percentage: number
@@ -8,10 +8,8 @@ type Rollout = {
 }
 
 type Rollouts = {
-  map: Record<string, Rollout>
-  rollout: {
-    records: Record<string, [Rollout]>
-  }
+  rolloutMap: Record<string, Rollout>
+  records: Record<string, [Rollout]>
 }
 
 /**
@@ -19,7 +17,7 @@ type Rollouts = {
  */
 export async function checkRollouts(domain: string): Promise<Rollouts> {
   const url = `https://${domain}`
-  const res = await fetch(url, { headers: { "x-debug-rollouts": "true" } })
-  if (!res.ok) throw new Error("Non-ok response from " + url)
+  const res = await fetch(url, { headers: { 'x-debug-rollouts': 'true' } })
+  if (!res.ok) throw new Error('Non-ok response from ' + url)
   return res.json() as any
 }

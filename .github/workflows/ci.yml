@@ -11,24 +11,36 @@ name: CI
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@master
+
       - name: Use Node.js 18.x
         uses: actions/setup-node@v1
         with:
           node-version: 18.x
+
       - name: set package.json version
         uses: menduz/oddish-action@master
         with:
           deterministic-snapshot: true
           only-update-versions: true
           main-branch-latest-tag: true
+
       - name: install
         run:  npm install
+
       - name: build
         run:  make build
+
+      - name: lint check
+        run:  npm run lint:check
+
       - name: test
         run:  make test
+
       - name: Publish
         uses: menduz/oddish-action@master
         with:
@@ -36,5 +48,7 @@ jobs:
           access: public
           deterministic-snapshot: true
           main-branch-latest-tag: true
+          ## sign the deployment
+          provenance: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
