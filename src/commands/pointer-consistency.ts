@@ -8,7 +8,7 @@ async function checkAssetBundleAvailability(entityId: string): Promise<void> {
   const platforms = [
     { name: 'WebGL', suffix: '' },
     { name: 'Windows', suffix: '_windows' },
-    { name: 'Mac', suffix: '_mac' },
+    { name: 'Mac', suffix: '_mac' }
   ]
 
   console.log('> Asset Bundles:')
@@ -28,7 +28,7 @@ async function checkAssetBundleAvailability(entityId: string): Promise<void> {
 
 export default async function () {
   const args = arg({
-    '--pointer': String,
+    '--pointer': String
   })
 
   let pointer = assert(args['--pointer'], '--pointer is missing')
@@ -69,15 +69,15 @@ export default async function () {
 
   console.log(
     `> PropagationTime: ${Math.floor((maxDate.getTime() - minDate.getTime()) / 1000)} seconds  `.padEnd(47, ' ') +
-      `${minDate.toISOString()} -> ${maxDate.toISOString()}`,
+      `${minDate.toISOString()} -> ${maxDate.toISOString()}`
   )
-  console.log(`> Convergent: ${entityIds.size == 1 ? '✅' : '❌'}`)
+  console.log(`> Convergent: ${entityIds.size === 1 ? '✅' : '❌'}`)
 
   // Check asset bundle availability for the most recent deployment
   if (deployments.length > 0) {
     // Find the most recent deployment
     const mostRecent = deployments.reduce((latest, current) =>
-      current.timestamp > latest.timestamp ? current : latest,
+      current.timestamp > latest.timestamp ? current : latest
     )
 
     console.log(`> Most recent deployment entity ID: ${mostRecent.entityId}`)
