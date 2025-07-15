@@ -1,34 +1,34 @@
-import arg from "arg"
-import { fetch } from "undici"
-import { ago } from "../helpers/ago"
-import { assert } from "../helpers/assert"
-import { daoCatalysts, fetchEntityByPointer, fetchWearablesByAddress } from "../helpers/catalysts"
+import arg from 'arg'
+import { fetch } from 'undici'
+import { ago } from '../helpers/ago'
+import { assert } from '../helpers/assert'
+import { daoCatalysts, fetchEntityByPointer } from '../helpers/catalysts'
 
 async function checkAssetBundleAvailability(entityId: string): Promise<void> {
   const platforms = [
-    { name: "WebGL", suffix: "" },
-    { name: "Windows", suffix: "_windows" },
-    { name: "Mac", suffix: "_mac" }
+    { name: 'WebGL', suffix: '' },
+    { name: 'Windows', suffix: '_windows' },
+    { name: 'Mac', suffix: '_mac' },
   ]
 
-  console.log("> Asset Bundles:")
-  
+  console.log('> Asset Bundles:')
+
   for (const platform of platforms) {
     const url = `https://ab-cdn.decentraland.org/manifest/${entityId}${platform.suffix}.json`
-    
+
     try {
       const response = await fetch(url)
-      const status = response.status === 200 ? "✅" : "❌"
-      console.log(`  ${platform.name.padEnd(8, " ")} ${status}`)
+      const status = response.status === 200 ? '✅' : '❌'
+      console.log(`  ${platform.name.padEnd(8, ' ')} ${status}`)
     } catch (error) {
-      console.log(`  ${platform.name.padEnd(8, " ")} ❌`)
+      console.log(`  ${platform.name.padEnd(8, ' ')} ❌`)
     }
   }
 }
 
 export default async function () {
   const args = arg({
-    '--pointer': String
+    '--pointer': String,
   })
 
   let pointer = assert(args['--pointer'], '--pointer is missing')
@@ -51,15 +51,9 @@ export default async function () {
       const result = await fetchEntityByPointer(baseUrl, pointer)
       const date = new Date(result.deployments[0]?.localTimestamp)
       const entityId = result.deployments[0]?.entityId
-      
-      console.log(
-        '  ' +
-          result.baseUrl.padEnd(45, ' ') +
-          date.toISOString() +
-          ` (${ago(date)}) ` +
-          entityId
-      )
-      
+
+      console.log('  ' + result.baseUrl.padEnd(45, ' ') + date.toISOString() + ` (${ago(date)}) ` + entityId)
+
       timestamps.push(date)
       entityIds.add(entityId)
       deployments.push({ timestamp: date, entityId })
@@ -75,19 +69,18 @@ export default async function () {
 
   console.log(
     `> PropagationTime: ${Math.floor((maxDate.getTime() - minDate.getTime()) / 1000)} seconds  `.padEnd(47, ' ') +
-      `${minDate.toISOString()} -> ${maxDate.toISOString()}`
+      `${minDate.toISOString()} -> ${maxDate.toISOString()}`,
   )
-  console.log(`> Convergent: ${entityIds.size === 1 ? '✅' : '❌'}`)
-  
+  console.log(`> Convergent: ${entityIds.size == 1 ? '✅' : '❌'}`)
+
   // Check asset bundle availability for the most recent deployment
   if (deployments.length > 0) {
     // Find the most recent deployment
-    const mostRecent = deployments.reduce((latest, current) => 
-      current.timestamp > latest.timestamp ? current : latest
+    const mostRecent = deployments.reduce((latest, current) =>
+      current.timestamp > latest.timestamp ? current : latest,
     )
-    
+
     console.log(`> Most recent deployment entity ID: ${mostRecent.entityId}`)
     await checkAssetBundleAvailability(mostRecent.entityId)
   }
-
 }
