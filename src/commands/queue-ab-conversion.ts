@@ -13,7 +13,8 @@ export default async () => {
     '--platform': [String],
     '--token': String,
     '--prioritize': Boolean,
-    '--animation': String
+    '--animation': String,
+    '--doISS': Boolean,
   })
 
   const pointers = args['--pointer'] || []
@@ -24,6 +25,8 @@ export default async () => {
   const contentUrl = (args['--content-server'] || 'https://peer.decentraland.org/content').replace(/\/$/, '')
   const shouldPrioritize = !!args['--prioritize']
   const animation = args['--animation'] || 'legacy'
+  const doISS = args['--doISS'] || false
+  
 
   assert(!!token, '--token is missing')
   assert(pointers.length > 0 || cids.length > 0, '--pointer or --cid are required')
@@ -69,7 +72,8 @@ export default async () => {
           ]
         },
         contentServerUrls: [contentUrl],
-        animation: animation
+        animation: animation,
+        doISS: doISS
       },
       token,
       shouldPrioritize,
