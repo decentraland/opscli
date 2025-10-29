@@ -29,7 +29,7 @@
   "homepage": "https://github.com/decentraland/opscli#readme",
   "dependencies": {
     "@dcl/crypto": "^3.4.5",
-    "@dcl/schemas": "^15.1.1",
+    "@dcl/schemas": "^19.6.0",
     "@well-known-components/fetch-component": "^3.0.0",
     "arg": "^5.0.2",
     "dcl-catalyst-client": "^21.7.0",
