@@ -15,7 +15,7 @@ export default async () => {
     '--prioritize': Boolean,
     '--animation': String,
     '--doISS': Boolean,
-    '--force': Boolean,
+    '--force': Boolean
   })
 
   const pointers = args['--pointer'] || []
@@ -28,7 +28,6 @@ export default async () => {
   const animation = args['--animation'] || 'legacy'
   const doISS = args['--doISS'] || false
   const force = args['--force'] || false
-
 
   assert(!!token, '--token is missing')
   assert(pointers.length > 0 || cids.length > 0, '--pointer or --cid are required')
