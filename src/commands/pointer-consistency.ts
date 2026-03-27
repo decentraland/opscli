@@ -8,7 +8,11 @@ function getEnvConfig(env: string) {
   const registryUrl = `https://asset-bundle-registry.decentraland.${env}`
 
   if (env === 'today') {
-    return { catalystUrls: ['https://peer-testing.decentraland.org'], registryUrl, peerUrl: 'https://peer-testing.decentraland.org' }
+    return {
+      catalystUrls: ['https://peer-testing.decentraland.org'],
+      registryUrl,
+      peerUrl: 'https://peer-testing.decentraland.org'
+    }
   }
   if (env === 'zone') {
     return { catalystUrls: ['https://peer.decentraland.zone'], registryUrl, peerUrl: 'https://peer.decentraland.zone' }
@@ -27,7 +31,7 @@ async function resolvePointerFromCid(peerUrl: string, cid: string): Promise<stri
     throw new Error(`Failed to resolve CID ${cid}: catalyst returned ${response.status}`)
   }
 
-  const entities = await response.json() as Array<{ id: string; pointers: string[] }>
+  const entities = (await response.json()) as Array<{ id: string; pointers: string[] }>
 
   if (!entities.length) {
     throw new Error(`No active entity found for CID ${cid}`)
@@ -40,16 +44,26 @@ async function resolvePointerFromCid(peerUrl: string, cid: string): Promise<stri
 
 function statusLabel(status: string): string {
   switch (status) {
-    case 'complete': return '✅ complete'
-    case 'pending': return '⏳ pending'
-    case 'failed': return '❌ failed'
-    case 'obsolete': return '🗑️  obsolete'
-    case 'fallback': return '🔄 fallback'
-    default: return `⚠️  ${status}`
+    case 'complete':
+      return '✅ complete'
+    case 'pending':
+      return '⏳ pending'
+    case 'failed':
+      return '❌ failed'
+    case 'obsolete':
+      return '🗑️  obsolete'
+    case 'fallback':
+      return '🔄 fallback'
+    default:
+      return `⚠️  ${status}`
   }
 }
 
-async function checkAssetBundleStatus(registryUrl: string, pointers: string[], expectedEntityId: string): Promise<void> {
+async function checkAssetBundleStatus(
+  registryUrl: string,
+  pointers: string[],
+  expectedEntityId: string
+): Promise<void> {
   try {
     const response = await fetch(`${registryUrl}/entities/active`, {
       method: 'POST',
@@ -62,7 +76,7 @@ async function checkAssetBundleStatus(registryUrl: string, pointers: string[], e
       return
     }
 
-    const results = await response.json() as Array<{
+    const results = (await response.json()) as Array<{
       id: string
       pointers: string[]
       status: string
