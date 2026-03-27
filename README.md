@@ -6,11 +6,29 @@ Operations command line tool.
 
 ### Validate deployment consistency
 
-Check the active deployment by pointer on every catalyst, usage:
+Check the active deployment by pointer on every catalyst, verify convergence across catalysts, and check asset bundle status via the asset bundle registry.
 
 ```
 npx @dcl/opscli pointer-consistency --pointer "0,0"
+npx @dcl/opscli pointer-consistency --pointer "0,0" --env zone
+npx @dcl/opscli pointer-consistency --cid "bafkrei..."
 ```
+
+- `--pointer` Scene pointer coordinate (e.g. `"0,0"`)
+- `--cid` Entity ID to resolve the pointer from (alternative to `--pointer`)
+- `--env` Environment: `org` (default), `today`, or `zone`
+
+### Check world asset bundle status
+
+Check asset bundle conversion status for all scenes in a world. Fetches scenes from the worlds-content-server, queries the asset bundle registry, and reports entity ID match, global status, and per-platform versions.
+
+```
+npx @dcl/opscli world-ab-status --world "dalkia.dcl.eth"
+npx @dcl/opscli world-ab-status --world "dalkia.dcl.eth" --env zone
+```
+
+- `--world` World name (e.g. `"dalkia.dcl.eth"`)
+- `--env` Environment: `org` (default), `today`, or `zone`
 
 ### Schedule asset bundle conversion
 
