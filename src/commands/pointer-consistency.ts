@@ -8,12 +8,34 @@ function getEnvConfig(env: string) {
   const registryUrl = `https://asset-bundle-registry.decentraland.${env}`
 
   if (env === 'today') {
-    return { catalystUrls: ['https://peer-testing.decentraland.org'], registryUrl }
+    return { catalystUrls: ['https://peer-testing.decentraland.org'], registryUrl, peerUrl: 'https://peer-testing.decentraland.org' }
   }
   if (env === 'zone') {
-    return { catalystUrls: ['https://peer.decentraland.zone'], registryUrl }
+    return { catalystUrls: ['https://peer.decentraland.zone'], registryUrl, peerUrl: 'https://peer.decentraland.zone' }
   }
-  return { catalystUrls: null, registryUrl } // null = fetch from DAO
+  return { catalystUrls: null, registryUrl, peerUrl: 'https://peer.decentraland.org' } // null = fetch from DAO
+}
+
+async function resolvePointerFromCid(peerUrl: string, cid: string): Promise<string> {
+  const response = await fetch(`${peerUrl}/content/entities/active`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids: [cid] })
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to resolve CID ${cid}: catalyst returned ${response.status}`)
+  }
+
+  const entities = await response.json() as Array<{ id: string; pointers: string[] }>
+
+  if (!entities.length) {
+    throw new Error(`No active entity found for CID ${cid}`)
+  }
+
+  const pointer = entities[0].pointers[0]
+  console.log(`> Resolved CID ${cid} to pointer: ${pointer}`)
+  return pointer
 }
 
 function statusLabel(status: string): string {
@@ -79,12 +101,17 @@ async function checkAssetBundleStatus(registryUrl: string, pointers: string[], e
 export default async function () {
   const args = arg({
     '--pointer': String,
+    '--cid': String,
     '--env': String
   })
 
-  let pointer = assert(args['--pointer'], '--pointer is missing')
   const env = args['--env'] || 'org'
-  const { catalystUrls, registryUrl } = getEnvConfig(env)
+  const { catalystUrls, registryUrl, peerUrl } = getEnvConfig(env)
+
+  let pointer = args['--pointer'] || (args['--cid'] ? await resolvePointerFromCid(peerUrl, args['--cid']) : null)
+  if (!pointer) {
+    throw new Error('--pointer or --cid is required')
+  }
 
   if (pointer.startsWith('\\')) {
     pointer = pointer.substring(1)
