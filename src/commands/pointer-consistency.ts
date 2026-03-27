@@ -1,7 +1,6 @@
 import arg from 'arg'
 import { fetch } from 'undici'
 import { ago } from '../helpers/ago'
-import { assert } from '../helpers/assert'
 import { daoCatalysts, fetchEntityByPointer } from '../helpers/catalysts'
 
 function getEnvConfig(env: string) {
