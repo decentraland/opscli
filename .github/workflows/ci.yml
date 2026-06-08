@@ -50,4 +50,3 @@ jobs:
           main-branch-latest-tag: true
           ## sign the deployment
           provenance: true
-        env:
