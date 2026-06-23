@@ -31,7 +31,7 @@ export default async () => {
 
   assert(!!snapshot, '--snapshot is missing')
   assert(!!token, '--token is missing')
-  platforms.forEach((platform) => assert(Object.values(Platform).includes(platform), `Invalid platform: ${platform}`))
+  platforms.forEach((platform) => assert(Object.values(Platform).includes(platform), `Invalid platform: ${platform}. Valid platforms: ${Object.values(Platform).join(', ')}`))
 
   console.log(`>                 Parameters:`)
   const contentUrl = (args['--content-server'] || 'https://peer.decentraland.org/content').replace(/\/$/, '')

@@ -43,7 +43,8 @@ npx @dcl/opscli queue-ab-conversion \
   [--ab-server https://ab-admin.decentraland.org] \
   [--content-server https://peer.decentraland.org/content]
 ```
-> If no platform is specified, it runs for all platforms. Also, more than one can be specified at a time.
+> **Note:** WebGL has been decommissioned and is no longer a valid platform target. Valid platforms are `windows` and `mac`.
+> If no platform is specified, it runs for all platforms (`windows`, `mac`). More than one can be specified at a time.
 
 > For dev, use `--ab-server https://ab-admin.decentraland.zone`.
 
