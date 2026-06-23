@@ -5,7 +5,6 @@ import { CliError } from '../bin'
 export const productionAbAdmin = 'https://ab-admin.decentraland.org'
 
 export enum Platform {
-  WEBGL = 'webgl',
   WINDOWS = 'windows',
   MAC = 'mac'
 }

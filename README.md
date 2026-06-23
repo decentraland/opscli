@@ -38,7 +38,6 @@ npx @dcl/opscli queue-ab-conversion \
   --pointer="110,10" \
   --cid "110,10" \
   --token <ACCESS_TOKEN> \
-  [--platform webgl] \
   [--platform mac] \
   [--platform windows] \
   [--ab-server https://ab-admin.decentraland.org] \
@@ -52,7 +51,6 @@ npx @dcl/opscli queue-ab-conversion \
 ```
 npx @dcl/opscli queue-ab-conversion-snapshot \
   --snapshot worlds \
-  [--platform webgl] \
   [--platform mac] \
   [--platform windows] \
   --token <ACCESS_TOKEN> \
@@ -63,7 +61,6 @@ npx @dcl/opscli queue-ab-conversion-snapshot \
 ```
 npx @dcl/opscli queue-ab-conversion-snapshot \
   --snapshot worlds \
-  [--platform webgl] \
   [--platform mac] \
   [--platform windows] \
   --token <ACCESS_TOKEN> \
@@ -76,7 +73,6 @@ npx @dcl/opscli queue-ab-conversion-snapshot \
 ```
 npx @dcl/opscli queue-ab-conversion-about \
   --token <ACCESS_TOKEN> \
-  [--platform webgl] \
   [--platform mac] \
   [--platform windows] \
   --about-url https://sdk-team-cdn.decentraland.org/ipfs/goerli-plaza-main/about \

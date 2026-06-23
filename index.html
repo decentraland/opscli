@@ -162,12 +162,8 @@
 
         for (const { entityId, pointers } of entityIdsToConvert) {
           appendLog(container, 'Pointers\n' + pointers.join(' ; '))
-          const result = await fetch(`${abServer}/manifest/${entityId}.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
           const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
           const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
-
-          appendLog(container, 'WEBGL')
-          await check(entityId, pointers, result)
 
           appendLog(container, 'WINDOWS')
           await check(entityId, pointers, resultWindows)
@@ -187,12 +183,8 @@
           const entity = await getWorldsActiveEntity(world, worldsServer)
           entityId = entity.configurations.scenesUrn[0].split(':')[3].split('?')[0]
           appendLog(container, 'World ' + world)
-          const result = await fetch(`${abServer}/manifest/${entityId}.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
           const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
           const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json?timestamp=${new Date().getTime()}`, { cache: "no-store" })
-
-          appendLog(container, 'WEBGL')
-          await check(entityId, [world], result)
 
           appendLog(container, 'WINDOWS')
           await check(entityId, [world], resultWindows)
