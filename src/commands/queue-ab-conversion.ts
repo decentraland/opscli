@@ -31,7 +31,12 @@ export default async () => {
 
   assert(!!token, '--token is missing')
   assert(pointers.length > 0 || cids.length > 0, '--pointer or --cid are required')
-  platforms.forEach((platform) => assert(Object.values(Platform).includes(platform), `Invalid platform: ${platform}. Valid platforms: ${Object.values(Platform).join(', ')}`))
+  platforms.forEach((platform) =>
+    assert(
+      Object.values(Platform).includes(platform),
+      `Invalid platform: ${platform}. Valid platforms: ${Object.values(Platform).join(', ')}`
+    )
+  )
 
   console.log(`>                 Parameters:`)
   pointers.length && console.log(`                    Pointers: ${pointers.join(',')}`)
