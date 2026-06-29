@@ -56,12 +56,8 @@ export default async () => {
   }
 
   for (const { entityId, pointers } of entityIdsToConvert) {
-    const result = await fetch(`${abServer}/manifest/${entityId}.json`)
     const resultWindows = await fetch(`${abServer}/manifest/${entityId}_windows.json`)
     const resultMac = await fetch(`${abServer}/manifest/${entityId}_mac.json`)
-
-    console.log('WEBGL')
-    await check(entityId, pointers, result)
 
     console.log('WINDOWS')
     await check(entityId, pointers, resultWindows)

@@ -97,7 +97,7 @@ async function checkAssetBundleStatus(
       console.log(`  Global status: ${statusLabel(entry.status)}`)
 
       console.log('  Platform status:')
-      const platforms = ['windows', 'mac', 'webgl']
+      const platforms = ['windows', 'mac']
       for (const platform of platforms) {
         const assetStatus = entry.bundles?.assets?.[platform] || 'unknown'
         const version = entry.versions?.assets?.[platform]

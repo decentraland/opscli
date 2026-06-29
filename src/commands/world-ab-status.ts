@@ -129,7 +129,7 @@ export default async function () {
     console.log(`  Entity ID match: ${idMatch ? '✅' : '🚨 STALE — registry has different entity'}`)
     console.log(`  Status: ${statusLabel(registryEntry.status)}`)
 
-    const platforms = ['windows', 'mac', 'webgl']
+    const platforms = ['windows', 'mac']
     console.log('  Versions:')
     for (const platform of platforms) {
       const version = registryEntry.versions?.assets?.[platform]
