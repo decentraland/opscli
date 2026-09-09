@@ -1,22 +1,12 @@
 import arg from 'arg'
 import { fetch } from 'undici'
-
-function statusLabel(status: string): string {
-  switch (status) {
-    case 'complete':
-      return '✅ complete'
-    case 'pending':
-      return '⏳ pending'
-    case 'failed':
-      return '❌ failed'
-    case 'obsolete':
-      return '🗑️  obsolete'
-    case 'fallback':
-      return '🔄 fallback'
-    default:
-      return `⚠️  ${status}`
-  }
-}
+import {
+  REPORTED_PLATFORMS,
+  parseRegistry,
+  registryUrlFor,
+  statusLabel,
+  versionSeriesNote
+} from '../helpers/ab-registry'
 
 type Scene = {
   entityId: string
@@ -37,7 +27,8 @@ type RegistryEntity = {
 export default async function () {
   const args = arg({
     '--world': String,
-    '--env': String
+    '--env': String,
+    '--registry': String
   })
 
   const world = args['--world']
@@ -46,8 +37,9 @@ export default async function () {
   }
 
   const env = args['--env'] || 'org'
+  const registry = parseRegistry(args['--registry'], env)
   const worldsUrl = `https://worlds-content-server.decentraland.${env}`
-  const registryUrl = `https://asset-bundle-registry.decentraland.${env}`
+  const registryUrl = registryUrlFor(registry, env)
 
   // Step 1: Discover scenes
   console.log(`> Fetching scenes for world: ${world} (${env})`)
@@ -83,7 +75,7 @@ export default async function () {
   }
 
   // Step 2: Check Asset Bundle Registry
-  console.log(`\n> Querying asset bundle registry...`)
+  console.log(`\n> Querying asset bundle registry [${registry}]...`)
   const registryResponse = await fetch(`${registryUrl}/entities/active?world_name=${encodeURIComponent(world)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -129,12 +121,16 @@ export default async function () {
     console.log(`  Entity ID match: ${idMatch ? '✅' : '🚨 STALE — registry has different entity'}`)
     console.log(`  Status: ${statusLabel(registryEntry.status)}`)
 
-    const platforms = ['windows', 'mac']
     console.log('  Versions:')
-    for (const platform of platforms) {
+    for (const platform of REPORTED_PLATFORMS) {
       const version = registryEntry.versions?.assets?.[platform]
       const versionStr = version ? `v${version.version} (${version.buildDate})` : 'N/A'
       console.log(`    ${platform.padEnd(10)} ${versionStr}`)
     }
+  }
+
+  const note = versionSeriesNote(registry)
+  if (note) {
+    console.log(note)
   }
 }
