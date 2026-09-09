@@ -1,12 +1,6 @@
 import arg from 'arg'
 import { fetch } from 'undici'
-import {
-  REPORTED_PLATFORMS,
-  formatVersion,
-  parseRegistry,
-  registryUrlFor,
-  statusLabel
-} from '../helpers/ab-registry'
+import { REPORTED_PLATFORMS, formatVersion, parseRegistry, registryUrlFor, statusLabel } from '../helpers/ab-registry'
 
 type Scene = {
   entityId: string
