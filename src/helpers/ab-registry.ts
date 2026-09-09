@@ -40,6 +40,12 @@ export function registryUrlFor(kind: RegistryKind, env: string): string {
   return `https://${host}.decentraland.${env}`
 }
 
+// The registry already stores the version prefixed ("v49"), so it is printed as
+// it comes; an entry with an empty version is a platform that never built.
+export function formatVersion(version: { version: string; buildDate: string } | undefined): string {
+  return version?.version ? `${version.version} (${version.buildDate})` : 'N/A'
+}
+
 export function statusLabel(status: string): string {
   switch (status) {
     case 'complete':

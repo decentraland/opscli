@@ -2,6 +2,7 @@ import arg from 'arg'
 import { fetch } from 'undici'
 import {
   REPORTED_PLATFORMS,
+  formatVersion,
   parseRegistry,
   registryUrlFor,
   statusLabel,
@@ -123,8 +124,7 @@ export default async function () {
 
     console.log('  Versions:')
     for (const platform of REPORTED_PLATFORMS) {
-      const version = registryEntry.versions?.assets?.[platform]
-      const versionStr = version ? `v${version.version} (${version.buildDate})` : 'N/A'
+      const versionStr = formatVersion(registryEntry.versions?.assets?.[platform])
       console.log(`    ${platform.padEnd(10)} ${versionStr}`)
     }
   }

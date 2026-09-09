@@ -5,6 +5,7 @@ import { daoCatalysts, fetchEntityByPointer } from '../helpers/catalysts'
 import {
   REPORTED_PLATFORMS,
   RegistryKind,
+  formatVersion,
   parseRegistry,
   registryUrlFor,
   statusLabel,
@@ -88,8 +89,7 @@ async function checkAssetBundleStatus(
       console.log('  Platform status:')
       for (const platform of REPORTED_PLATFORMS) {
         const assetStatus = entry.bundles?.assets?.[platform] || 'unknown'
-        const version = entry.versions?.assets?.[platform]
-        const versionStr = version ? `v${version.version} (${version.buildDate})` : 'N/A'
+        const versionStr = formatVersion(entry.versions?.assets?.[platform])
 
         console.log(`    ${platform.padEnd(10)} ${statusLabel(assetStatus).padEnd(4)} version: ${versionStr}`)
       }
