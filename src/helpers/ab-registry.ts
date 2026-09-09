@@ -62,10 +62,3 @@ export function statusLabel(status: string): string {
       return `⚠️  ${status}`
   }
 }
-
-// abgen counts its bundle versions in its own series (v1003 at the time of
-// writing) while the Unity converters are in another (v49). Neither is "newer"
-// than the other, so say so rather than let the two be compared.
-export function versionSeriesNote(kind: RegistryKind): string | null {
-  return kind === 'abgen' ? '  (abgen versions are a separate series from the Unity converters)' : null
-}

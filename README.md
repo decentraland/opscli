@@ -59,8 +59,7 @@ The Unity converters and the abgen generator publish to two separate registries:
 `--registry abgen` on `today` is rejected: abgen has no queue there and the hostname does not resolve.
 
 The two count bundle versions in **separate series** — abgen is in the `v1000`s while the Unity
-converters are in the `v40`s — so an abgen `v1003` is not "newer" than a Unity `v49`. The status
-commands print a reminder when reading the abgen registry.
+converters are in the `v40`s — so an abgen `v1003` is not "newer" than a Unity `v49`.
 
 Both registries still return a `webgl` platform key, empty or years stale. It is decommissioned and
 the status commands do not report it.

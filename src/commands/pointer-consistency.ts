@@ -8,8 +8,7 @@ import {
   formatVersion,
   parseRegistry,
   registryUrlFor,
-  statusLabel,
-  versionSeriesNote
+  statusLabel
 } from '../helpers/ab-registry'
 
 function getEnvConfig(env: string) {
@@ -92,11 +91,6 @@ async function checkAssetBundleStatus(
         const versionStr = formatVersion(entry.versions?.assets?.[platform])
 
         console.log(`    ${platform.padEnd(10)} ${statusLabel(assetStatus).padEnd(4)} version: ${versionStr}`)
-      }
-
-      const note = versionSeriesNote(kind)
-      if (note) {
-        console.log(note)
       }
     }
   } catch (error: any) {

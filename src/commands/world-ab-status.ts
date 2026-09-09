@@ -5,8 +5,7 @@ import {
   formatVersion,
   parseRegistry,
   registryUrlFor,
-  statusLabel,
-  versionSeriesNote
+  statusLabel
 } from '../helpers/ab-registry'
 
 type Scene = {
@@ -127,10 +126,5 @@ export default async function () {
       const versionStr = formatVersion(registryEntry.versions?.assets?.[platform])
       console.log(`    ${platform.padEnd(10)} ${versionStr}`)
     }
-  }
-
-  const note = versionSeriesNote(registry)
-  if (note) {
-    console.log(note)
   }
 }
