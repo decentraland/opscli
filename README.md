@@ -43,8 +43,10 @@ npx @dcl/opscli queue-ab-conversion \
   [--ab-server https://ab-admin.decentraland.org] \
   [--content-server https://peer.decentraland.org/content]
 ```
-> **Note:** WebGL has been decommissioned and is no longer a valid platform target. Valid platforms are `windows` and `mac`.
-> If no platform is specified, it runs for all platforms (`windows`, `mac`). More than one can be specified at a time.
+> **Note:** WebGL has been decommissioned and is no longer a valid platform target. Valid platforms are `windows`, `mac` and `abgen`.
+> If no platform is specified, it runs for the default platforms (`windows`, `mac`). More than one can be specified at a time.
+>
+> `abgen` is not an OS: it routes the job to the abgen generator (the Rust asset-bundle pipeline), which converts every platform it supports in a single job. It is opt-in only — never included by default — and requires the target environment's ab-admin to have the abgen queue configured (currently `org` and `zone`; `today` has no abgen and returns a 400). `--prioritize` is accepted but abgen has a single queue with no priority lane, and `--animation`/`--doISS` are Unity-only and ignored by abgen.
 
 > For dev, use `--ab-server https://ab-admin.decentraland.zone`.
 

@@ -6,8 +6,15 @@ export const productionAbAdmin = 'https://ab-admin.decentraland.org'
 
 export enum Platform {
   WINDOWS = 'windows',
-  MAC = 'mac'
+  MAC = 'mac',
+  // Not an OS: routes the job to the abgen generator's queue instead of a Unity
+  // converter queue (one abgen job converts every platform it supports).
+  ABGEN = 'abgen'
 }
+
+// Used when --platform is omitted. abgen is deliberately excluded so default and
+// mass reconversions don't feed it until explicitly requested with --platform abgen.
+export const DEFAULT_PLATFORMS = [Platform.WINDOWS, Platform.MAC]
 
 export async function queueConversions(
   customABConverterServer: string,
