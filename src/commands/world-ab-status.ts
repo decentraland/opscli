@@ -52,20 +52,15 @@ export default async function () {
 
   console.log(`> Found ${scenes.length} scene(s)`)
 
-  // Collect all pointers and build a map of entityId per pointer
+  // Collect every parcel of every scene: the registry is queried for all of them at once
   const allPointers: string[] = []
-  const entityIdByPointer = new Map<string, string>()
 
   for (const scene of scenes) {
     const name = scene.entity.metadata?.display?.title || 'Untitled'
     const base = scene.entity.metadata?.scene?.base || scene.parcels[0]
     console.log(`\n  Scene: ${name} (base: ${base}, parcels: ${scene.parcels.length})`)
     console.log(`  Entity ID: ${scene.entityId}`)
-
-    for (const pointer of scene.parcels) {
-      allPointers.push(pointer)
-      entityIdByPointer.set(pointer, scene.entityId)
-    }
+    allPointers.push(...scene.parcels)
   }
 
   // Step 2: Check Asset Bundle Registry
@@ -89,11 +84,6 @@ export default async function () {
   }
 
   // Match registry entities back to scenes
-  const registryByEntityId = new Map<string, RegistryEntity>()
-  for (const entry of registryEntities) {
-    registryByEntityId.set(entry.id, entry)
-  }
-
   console.log('')
   for (const scene of scenes) {
     const name = scene.entity.metadata?.display?.title || 'Untitled'
