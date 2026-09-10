@@ -1,22 +1,6 @@
 import arg from 'arg'
 import { fetch } from 'undici'
-
-function statusLabel(status: string): string {
-  switch (status) {
-    case 'complete':
-      return '✅ complete'
-    case 'pending':
-      return '⏳ pending'
-    case 'failed':
-      return '❌ failed'
-    case 'obsolete':
-      return '🗑️  obsolete'
-    case 'fallback':
-      return '🔄 fallback'
-    default:
-      return `⚠️  ${status}`
-  }
-}
+import { REPORTED_PLATFORMS, formatVersion, parseRegistry, registryUrlFor, statusLabel } from '../helpers/ab-registry'
 
 type Scene = {
   entityId: string
@@ -37,7 +21,8 @@ type RegistryEntity = {
 export default async function () {
   const args = arg({
     '--world': String,
-    '--env': String
+    '--env': String,
+    '--registry': String
   })
 
   const world = args['--world']
@@ -46,8 +31,9 @@ export default async function () {
   }
 
   const env = args['--env'] || 'org'
+  const registry = parseRegistry(args['--registry'], env)
   const worldsUrl = `https://worlds-content-server.decentraland.${env}`
-  const registryUrl = `https://asset-bundle-registry.decentraland.${env}`
+  const registryUrl = registryUrlFor(registry, env)
 
   // Step 1: Discover scenes
   console.log(`> Fetching scenes for world: ${world} (${env})`)
@@ -66,24 +52,19 @@ export default async function () {
 
   console.log(`> Found ${scenes.length} scene(s)`)
 
-  // Collect all pointers and build a map of entityId per pointer
+  // Collect every parcel of every scene: the registry is queried for all of them at once
   const allPointers: string[] = []
-  const entityIdByPointer = new Map<string, string>()
 
   for (const scene of scenes) {
     const name = scene.entity.metadata?.display?.title || 'Untitled'
     const base = scene.entity.metadata?.scene?.base || scene.parcels[0]
     console.log(`\n  Scene: ${name} (base: ${base}, parcels: ${scene.parcels.length})`)
     console.log(`  Entity ID: ${scene.entityId}`)
-
-    for (const pointer of scene.parcels) {
-      allPointers.push(pointer)
-      entityIdByPointer.set(pointer, scene.entityId)
-    }
+    allPointers.push(...scene.parcels)
   }
 
   // Step 2: Check Asset Bundle Registry
-  console.log(`\n> Querying asset bundle registry...`)
+  console.log(`\n> Querying asset bundle registry [${registry}]...`)
   const registryResponse = await fetch(`${registryUrl}/entities/active?world_name=${encodeURIComponent(world)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -103,11 +84,6 @@ export default async function () {
   }
 
   // Match registry entities back to scenes
-  const registryByEntityId = new Map<string, RegistryEntity>()
-  for (const entry of registryEntities) {
-    registryByEntityId.set(entry.id, entry)
-  }
-
   console.log('')
   for (const scene of scenes) {
     const name = scene.entity.metadata?.display?.title || 'Untitled'
@@ -129,11 +105,9 @@ export default async function () {
     console.log(`  Entity ID match: ${idMatch ? '✅' : '🚨 STALE — registry has different entity'}`)
     console.log(`  Status: ${statusLabel(registryEntry.status)}`)
 
-    const platforms = ['windows', 'mac']
     console.log('  Versions:')
-    for (const platform of platforms) {
-      const version = registryEntry.versions?.assets?.[platform]
-      const versionStr = version ? `v${version.version} (${version.buildDate})` : 'N/A'
+    for (const platform of REPORTED_PLATFORMS) {
+      const versionStr = formatVersion(registryEntry.versions?.assets?.[platform])
       console.log(`    ${platform.padEnd(10)} ${versionStr}`)
     }
   }

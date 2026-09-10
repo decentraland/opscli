@@ -17,6 +17,7 @@ npx @dcl/opscli pointer-consistency --cid "bafkrei..."
 - `--pointer` Scene pointer coordinate (e.g. `"0,0"`)
 - `--cid` Entity ID to resolve the pointer from (alternative to `--pointer`)
 - `--env` Environment: `org` (default), `today`, or `zone`
+- `--registry` Which registry to read: `unity` (default) or `abgen` — see [asset bundle registries](#asset-bundle-registries)
 
 ### Check world asset bundle status
 
@@ -25,10 +26,43 @@ Check asset bundle conversion status for all scenes in a world. Fetches scenes f
 ```
 npx @dcl/opscli world-ab-status --world "dalkia.dcl.eth"
 npx @dcl/opscli world-ab-status --world "dalkia.dcl.eth" --env zone
+npx @dcl/opscli world-ab-status --world "dalkia.dcl.eth" --registry abgen
 ```
 
 - `--world` World name (e.g. `"dalkia.dcl.eth"`)
 - `--env` Environment: `org` (default), `today`, or `zone`
+- `--registry` Which registry to read: `unity` (default) or `abgen` — see [asset bundle registries](#asset-bundle-registries)
+
+### Check the conversion queue
+
+Report how many jobs are pending per platform queue, and optionally where given entities sit in them.
+
+```
+npx @dcl/opscli ab-queue-status
+npx @dcl/opscli ab-queue-status --env zone --registry abgen
+npx @dcl/opscli ab-queue-status --cid "bafkrei..." --cid "bafkrei..."
+```
+
+- `--env` Environment: `org` (default), `today`, or `zone`
+- `--registry` Which registry's queue to read: `unity` (default) or `abgen`
+- `--cid` Entity ID to locate in each queue; repeatable. Positions are 1-indexed — the next entity to convert is `#1`
+
+### Asset bundle registries
+
+The Unity converters and the abgen generator publish to two separate registries:
+
+| Registry | Base URL | Environments |
+|---|---|---|
+| `unity` (default) | `https://asset-bundle-registry.decentraland.<env>` | `org`, `today`, `zone` |
+| `abgen` | `https://asset-bundle-registry-abgen.decentraland.<env>` | `org`, `zone` |
+
+`--registry abgen` on `today` is rejected: abgen has no queue there and the hostname does not resolve.
+
+The two count bundle versions in **separate series** — abgen is in the `v1000`s while the Unity
+converters are in the `v40`s — so an abgen `v1003` is not "newer" than a Unity `v49`.
+
+Both registries still return a `webgl` platform key, empty or years stale. It is decommissioned and
+the status commands do not report it.
 
 ### Schedule asset bundle conversion
 

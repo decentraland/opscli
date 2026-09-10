@@ -2,21 +2,26 @@ import arg from 'arg'
 import { fetch } from 'undici'
 import { ago } from '../helpers/ago'
 import { daoCatalysts, fetchEntityByPointer } from '../helpers/catalysts'
+import {
+  REPORTED_PLATFORMS,
+  RegistryKind,
+  formatVersion,
+  parseRegistry,
+  registryUrlFor,
+  statusLabel
+} from '../helpers/ab-registry'
 
 function getEnvConfig(env: string) {
-  const registryUrl = `https://asset-bundle-registry.decentraland.${env}`
-
   if (env === 'today') {
     return {
       catalystUrls: ['https://peer-testing.decentraland.org'],
-      registryUrl,
       peerUrl: 'https://peer-testing.decentraland.org'
     }
   }
   if (env === 'zone') {
-    return { catalystUrls: ['https://peer.decentraland.zone'], registryUrl, peerUrl: 'https://peer.decentraland.zone' }
+    return { catalystUrls: ['https://peer.decentraland.zone'], peerUrl: 'https://peer.decentraland.zone' }
   }
-  return { catalystUrls: null, registryUrl, peerUrl: 'https://peer.decentraland.org' } // null = fetch from DAO
+  return { catalystUrls: null, peerUrl: 'https://peer.decentraland.org' } // null = fetch from DAO
 }
 
 async function resolvePointerFromCid(peerUrl: string, cid: string): Promise<string> {
@@ -41,24 +46,8 @@ async function resolvePointerFromCid(peerUrl: string, cid: string): Promise<stri
   return pointer
 }
 
-function statusLabel(status: string): string {
-  switch (status) {
-    case 'complete':
-      return '✅ complete'
-    case 'pending':
-      return '⏳ pending'
-    case 'failed':
-      return '❌ failed'
-    case 'obsolete':
-      return '🗑️  obsolete'
-    case 'fallback':
-      return '🔄 fallback'
-    default:
-      return `⚠️  ${status}`
-  }
-}
-
 async function checkAssetBundleStatus(
+  kind: RegistryKind,
   registryUrl: string,
   pointers: string[],
   expectedEntityId: string
@@ -92,16 +81,14 @@ async function checkAssetBundleStatus(
 
     for (const entry of results) {
       const hashMatch = entry.id === expectedEntityId
-      console.log(`> Asset Bundle Registry (pointer: ${entry.pointers.join(', ')}):`)
+      console.log(`> Asset Bundle Registry [${kind}] (pointer: ${entry.pointers.join(', ')}):`)
       console.log(`  Entity ID match: ${hashMatch ? '✅' : '❌'} registry=${entry.id}`)
       console.log(`  Global status: ${statusLabel(entry.status)}`)
 
       console.log('  Platform status:')
-      const platforms = ['windows', 'mac']
-      for (const platform of platforms) {
+      for (const platform of REPORTED_PLATFORMS) {
         const assetStatus = entry.bundles?.assets?.[platform] || 'unknown'
-        const version = entry.versions?.assets?.[platform]
-        const versionStr = version ? `v${version.version} (${version.buildDate})` : 'N/A'
+        const versionStr = formatVersion(entry.versions?.assets?.[platform])
 
         console.log(`    ${platform.padEnd(10)} ${statusLabel(assetStatus).padEnd(4)} version: ${versionStr}`)
       }
@@ -115,11 +102,13 @@ export default async function () {
   const args = arg({
     '--pointer': String,
     '--cid': String,
-    '--env': String
+    '--env': String,
+    '--registry': String
   })
 
   const env = args['--env'] || 'org'
-  const { catalystUrls, registryUrl, peerUrl } = getEnvConfig(env)
+  const registry = parseRegistry(args['--registry'], env)
+  const { catalystUrls, peerUrl } = getEnvConfig(env)
 
   let pointer = args['--pointer'] || (args['--cid'] ? await resolvePointerFromCid(peerUrl, args['--cid']) : null)
   if (!pointer) {
@@ -175,6 +164,6 @@ export default async function () {
       current.timestamp > latest.timestamp ? current : latest
     )
     console.log(`> Most recent deployment entity ID: ${mostRecent.entityId}`)
-    await checkAssetBundleStatus(registryUrl, [pointer], mostRecent.entityId)
+    await checkAssetBundleStatus(registry, registryUrlFor(registry, env), [pointer], mostRecent.entityId)
   }
 }

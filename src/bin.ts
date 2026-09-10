@@ -15,6 +15,7 @@ import checkAbConversion from './commands/check-ab-conversion'
 import circleci from './commands/circleci'
 import concatSnapshots from './commands/concat-snapshots'
 import worldAbStatus from './commands/world-ab-status'
+import abQueueStatus from './commands/ab-queue-status'
 
 export class CliError extends Error {}
 
@@ -33,7 +34,8 @@ const commands = {
   'check-ab-conversion': checkAbConversion,
   circleci: circleci,
   'concat-snapshots': concatSnapshots,
-  'world-ab-status': worldAbStatus
+  'world-ab-status': worldAbStatus,
+  'ab-queue-status': abQueueStatus
 }
 
 async function main() {
