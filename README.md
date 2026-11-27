@@ -72,15 +72,13 @@ npx @dcl/opscli queue-ab-conversion \
   --pointer="110,10" \
   --cid "110,10" \
   --token <ACCESS_TOKEN> \
-  [--platform mac] \
-  [--platform windows] \
+  [--platform abgen] \
   [--ab-server https://ab-admin.decentraland.org] \
   [--content-server https://peer.decentraland.org/content]
 ```
-> **Note:** WebGL has been decommissioned and is no longer a valid platform target. Valid platforms are `windows`, `mac` and `abgen`.
-> If no platform is specified, it runs for the default platforms (`windows`, `mac`). More than one can be specified at a time.
+> **Note:** The only valid platform is `abgen`, and it is the default when `--platform` is omitted. The Unity converter targets (`windows`, `mac`, `webgl`) have been decommissioned and are rejected.
 >
-> `abgen` is not an OS: it routes the job to the abgen generator (the Rust asset-bundle pipeline), which converts every platform it supports in a single job. It is opt-in only — never included by default — and requires the target environment's ab-admin to have the abgen queue configured (currently `org` and `zone`; `today` has no abgen and returns a 400). `--prioritize` is accepted but abgen has a single queue with no priority lane, and `--animation`/`--doISS` are Unity-only and ignored by abgen.
+> `abgen` is not an OS: it routes the job to the abgen generator (the Rust asset-bundle pipeline), which converts every platform it supports in a single job. It requires the target environment's ab-admin to have the abgen queue configured (currently `org` and `zone`; `today` has no abgen and returns a 400). `--prioritize` is accepted but abgen has a single queue with no priority lane, and `--animation`/`--doISS` are ignored by abgen.
 
 > For dev, use `--ab-server https://ab-admin.decentraland.zone`.
 
@@ -88,8 +86,7 @@ npx @dcl/opscli queue-ab-conversion \
 ```
 npx @dcl/opscli queue-ab-conversion-snapshot \
   --snapshot worlds \
-  [--platform mac] \
-  [--platform windows] \
+  [--platform abgen] \
   --token <ACCESS_TOKEN> \
   [--ab-server https://ab-admin.decentraland.org]
 ```
@@ -98,8 +95,7 @@ npx @dcl/opscli queue-ab-conversion-snapshot \
 ```
 npx @dcl/opscli queue-ab-conversion-snapshot \
   --snapshot worlds \
-  [--platform mac] \
-  [--platform windows] \
+  [--platform abgen] \
   --token <ACCESS_TOKEN> \
   [--ab-server https://ab-admin.decentraland.org]
   [--world-name <world-name.dcl.eth>]
@@ -110,8 +106,7 @@ npx @dcl/opscli queue-ab-conversion-snapshot \
 ```
 npx @dcl/opscli queue-ab-conversion-about \
   --token <ACCESS_TOKEN> \
-  [--platform mac] \
-  [--platform windows] \
+  [--platform abgen] \
   --about-url https://sdk-team-cdn.decentraland.org/ipfs/goerli-plaza-main/about \
   [--ab-server https://ab-admin.decentraland.org]
 ```
